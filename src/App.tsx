@@ -1,7 +1,27 @@
 import { Search, ChevronDown, Menu, Download, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
+import React, { useState } from 'react';
 import { AssetCard } from './components/AssetCard';
 
 function App() {
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+
+  // Categories and subcategories
+  const categories = [
+    'Furniture',
+    'Decoration',
+    'Childroom',
+    'Technology',
+    'Bathroom',
+    'Lighting',
+    'Kitchen',
+    'Other Models',
+    'Exterior',
+  ];
+  const furnitureSubcategories = [
+    'Cabinets', 'Sofas', 'Tables', 'Chairs', 'Bar stools', 'Beds', 'Desks', 'Office furniture', 'Armchairs', 'Other seating',
+    'Table + Chair', 'Shelves', 'Sideboard & Chest of Drawer', 'Other'
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       <header className="border-b border-gray-200">
@@ -14,10 +34,52 @@ function App() {
 
               <nav className="hidden md:flex space-x-6">
                 <div className="relative group">
-                  <button className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900">
-                    3D Models
-                    <ChevronDown className="ml-1 h-4 w-4" />
-                  </button>
+                    <button className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900">
+                      3D Models
+                      <ChevronDown className="ml-1 h-4 w-4" />
+                    </button>
+                    {/* Dropdown menu for 3D Models */}
+                    <div className="absolute left-0 top-full z-20 w-[900px] bg-gray-100 shadow-xl rounded-2xl mt-2 p-8 flex opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200">
+                      {/* Left column: categories */}
+                      <div className="w-1/3">
+                        <div className="text-xl font-bold mb-4">3D Models</div>
+                        <ul className="space-y-2">
+                          {categories.map(cat => (
+                            <li key={cat}>
+                              <a
+                                href="#"
+                                className={`flex justify-between items-center text-lg font-medium text-gray-800 hover:text-gray-900 ${hoveredCategory === cat ? 'underline' : ''}`}
+                                onMouseEnter={() => setHoveredCategory(cat)}
+                                onMouseLeave={() => setHoveredCategory(null)}
+                              >
+                                {cat}
+                                <ChevronDown className="h-4 w-4" />
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      {/* Right column: subcategories, only for Furniture */}
+                      {hoveredCategory === 'Furniture' && (
+                        <div className="w-2/3 grid grid-cols-2 gap-x-8 gap-y-2">
+                          <div>
+                            <div className="text-xl font-bold mb-4">Furniture</div>
+                            <ul className="space-y-2">
+                              {furnitureSubcategories.slice(0, 10).map(sub => (
+                                <li key={sub}><a href="#" className="text-lg text-gray-800 hover:text-gray-900">{sub}</a></li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="pt-8">
+                            <ul className="space-y-2">
+                              {furnitureSubcategories.slice(10).map(sub => (
+                                <li key={sub}><a href="#" className="text-lg text-gray-800 hover:text-gray-900">{sub}</a></li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                 </div>
                 <div className="relative group">
                   <button className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900">
