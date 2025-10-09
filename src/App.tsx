@@ -1,9 +1,11 @@
 import { Search, ChevronDown, Menu, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
-import { AssetCard } from './components/AssetCard';
-import { featuredWorkAssets, newModelAssets, newSceneAssets, textureAssets } from './data/homeContent';
+import { Link, NavLink, Routes, Route } from 'react-router-dom';
+import { HomePage } from './pages/HomePage';
+import { ModelsPage } from './pages/ModelsPage';
+import { ScenesPage } from './pages/ScenesPage';
+import { TexturesPage } from './pages/TexturesPage';
 
 function App() {
-
   // Categories and subcategories
   const categories = [
     'Furniture',
@@ -17,21 +19,27 @@ function App() {
     'Exterior',
   ];
   const sceneCategories = ['Interior', 'Exterior'];
+
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `flex items-center gap-1 transition-colors ${isActive ? 'text-white' : 'text-gray-300 hover:text-white'}`;
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       <header className="bg-gray-950 text-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6 h-20">
             <div className="flex items-center">
-              <div className="text-2xl font-bold tracking-wide">ILMIORA</div>
+              <Link to="/" className="text-2xl font-bold tracking-wide">
+                ILMIORA
+              </Link>
             </div>
 
             <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-gray-300">
               <div className="relative group">
-                <button className="flex items-center gap-1 hover:text-white transition-colors">
+                <NavLink to="/models" className={navLinkClass} end>
                   3D Models
                   <ChevronDown className="h-4 w-4" />
-                </button>
+                </NavLink>
                 {/* Dropdown menu for 3D Models */}
                 <div className="absolute left-0 top-full z-20 mt-3 w-[760px] rounded-3xl bg-gray-900/95 backdrop-blur shadow-2xl border border-gray-800 p-8 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200">
                   <div className="flex flex-col gap-8">
@@ -54,22 +62,22 @@ function App() {
                       </div>
                     </div>
                     <div className="pt-4 border-t border-gray-800">
-                      <a
-                        href="#"
+                      <Link
+                        to="/models"
                         className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:translate-x-1 transition-transform"
                       >
                         All 3D Models
                         <ChevronDown className="h-4 w-4 rotate-[-90deg]" />
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="relative group">
-                <button className="flex items-center gap-1 hover:text-white transition-colors">
+                <NavLink to="/scenes" className={navLinkClass} end>
                   3D Scenes
                   <ChevronDown className="h-4 w-4" />
-                </button>
+                </NavLink>
                 <div className="absolute left-0 top-full z-20 mt-3 w-[760px] rounded-3xl bg-gray-900/95 backdrop-blur shadow-2xl border border-gray-800 p-8 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200">
                   <div className="flex flex-col gap-8">
                     <div>
@@ -87,20 +95,20 @@ function App() {
                       </div>
                     </div>
                     <div className="pt-4 border-t border-gray-800">
-                      <a
-                        href="#"
+                      <Link
+                        to="/scenes"
                         className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:translate-x-1 transition-transform"
                       >
                         All 3D Scenes
                         <ChevronDown className="h-4 w-4 rotate-[-90deg]" />
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
               </div>
-              <button className="flex items-center gap-1 hover:text-white transition-colors">
+              <NavLink to="/textures" className={navLinkClass} end>
                 Textures
-              </button>
+              </NavLink>
             </nav>
 
             <div className="hidden md:flex flex-1 justify-center">
@@ -128,95 +136,13 @@ function App() {
           </div>
         </div>
       </header>
-
-      <main>
-        <section className="relative bg-gradient-to-br from-gray-50 to-gray-100 py-20 md:py-32">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                The First Digital Platform
-                <br />
-                <span className="text-gray-600">Designed for Designers</span>
-              </h1>
-              <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                Access thousands of professional 3D models, scenes, and textures curated specifically for architects, interior designers, and creative professionals.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="inline-flex items-center px-8 py-4 rounded-md text-base font-medium text-white bg-gray-900 hover:bg-gray-800 transition-colors">
-                  Explore Resources
-                </button>
-                <button className="inline-flex items-center px-8 py-4 rounded-md text-base font-medium text-gray-900 bg-white border-2 border-gray-900 hover:bg-gray-50 transition-colors">
-                  Learn More
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">New 3D Models</h2>
-              <a href="#" className="text-sm font-medium text-gray-700 hover:text-gray-900">
-                View All →
-              </a>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-              {newModelAssets.map(({ id, ...asset }) => (
-                <AssetCard key={id} {...asset} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">New 3D Scenes</h2>
-              <a href="#" className="text-sm font-medium text-gray-700 hover:text-gray-900">
-                View All →
-              </a>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {newSceneAssets.map(({ id, ...asset }) => (
-                <AssetCard key={id} {...asset} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">New Textures</h2>
-              <a href="#" className="text-sm font-medium text-gray-700 hover:text-gray-900">
-                View All →
-              </a>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              {textureAssets.map(({ id, ...asset }) => (
-                <AssetCard key={id} {...asset} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">Featured Works</h2>
-              <a href="#" className="text-sm font-medium text-gray-700 hover:text-gray-900">
-                View All →
-              </a>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {featuredWorkAssets.map(({ id, ...asset }) => (
-                <AssetCard key={id} {...asset} />
-              ))}
-            </div>
-          </div>
-        </section>
-
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/models" element={<ModelsPage />} />
+          <Route path="/scenes" element={<ScenesPage />} />
+          <Route path="/textures" element={<TexturesPage />} />
+        </Routes>
       </main>
 
       <footer className="bg-gray-950 text-gray-200 py-16">
@@ -225,9 +151,9 @@ function App() {
             <div className="min-w-[160px]">
               <h3 className="font-semibold mb-4">Resources</h3>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white">3D Models</a></li>
-                <li><a href="#" className="hover:text-white">3D Scenes</a></li>
-                <li><a href="#" className="hover:text-white">Textures</a></li>
+                <li><Link to="/models" className="hover:text-white">3D Models</Link></li>
+                <li><Link to="/scenes" className="hover:text-white">3D Scenes</Link></li>
+                <li><Link to="/textures" className="hover:text-white">Textures</Link></li>
                 <li><a href="#" className="hover:text-white">Brands</a></li>
               </ul>
             </div>
