@@ -1,6 +1,6 @@
 import { Eye, Heart, Download } from 'lucide-react';
 
-interface AssetCardProps {
+export interface AssetCardProps {
   image: string;
   title: string;
   subtitle?: string;
