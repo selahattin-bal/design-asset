@@ -1,6 +1,13 @@
 import type { AssetCardProps } from '../components/AssetCard';
 
-export type AssetCardContent = AssetCardProps & { id: string };
+export type AssetCardContent = AssetCardProps & {
+  id: string;
+  category?: string;
+  brand?: string;
+  description?: string;
+  downloadOptions?: Array<{ label: string; size: string }>;
+  gallery?: string[];
+};
 
 export const newModelAssets: AssetCardContent[] = [
   {
@@ -15,6 +22,19 @@ export const newModelAssets: AssetCardContent[] = [
     credits: 'free',
     size: 'small',
     aspectRatio: 'square',
+    category: 'Furniture',
+    brand: 'Polflex',
+    description:
+      'A sculptural lounge chair with vibrant upholstery and refined piping, ideal for accent seating in residential or hospitality interiors.',
+    downloadOptions: [
+      { label: 'Download 3D Model', size: '42.3 MB' },
+      { label: 'Download SketchUp', size: '39.8 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1350789/pexels-photo-1350789.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/276528/pexels-photo-276528.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/1866149/pexels-photo-1866149.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    ],
   },
   {
     id: 'model-dining-table',
@@ -28,6 +48,19 @@ export const newModelAssets: AssetCardContent[] = [
     credits: 5,
     size: 'small',
     aspectRatio: 'square',
+    category: 'Furniture',
+    brand: 'Oakline Studio',
+    description:
+      'A contemporary dining ensemble featuring a stone tabletop and upholstered seating, packaged for flexible configurations.',
+    downloadOptions: [
+      { label: 'Download 3D Model', size: '58.7 MB' },
+      { label: 'Download FBX', size: '54.1 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/2089698/pexels-photo-2089698.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    ],
   },
   {
     id: 'model-pendant-light',
@@ -41,6 +74,19 @@ export const newModelAssets: AssetCardContent[] = [
     credits: 3,
     size: 'small',
     aspectRatio: 'square',
+    category: 'Lighting',
+    brand: 'Lumen Works',
+    description:
+      'Slimline pendant fixture with brushed brass detail and opal diffuser, supplied in multiple hanging heights.',
+    downloadOptions: [
+      { label: 'Download 3D Model', size: '24.6 MB' },
+      { label: 'Download OBJ', size: '21.9 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1866149/pexels-photo-1866149.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/1125135/pexels-photo-1125135.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/279719/pexels-photo-279719.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    ],
   },
   {
     id: 'model-modern-sofa',
@@ -54,6 +100,19 @@ export const newModelAssets: AssetCardContent[] = [
     credits: 'free',
     size: 'small',
     aspectRatio: 'square',
+    category: 'Furniture',
+    brand: 'Ilmiora Studio',
+    description:
+      'Plush three-seater sofa with soft cushions and rounded edges, perfect for contemporary living spaces.',
+    downloadOptions: [
+      { label: 'Download 3D Model', size: '61.4 MB' },
+      { label: 'Download Blender', size: '59.2 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1148955/pexels-photo-1148955.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    ],
   },
   {
     id: 'model-office-desk',
@@ -67,6 +126,19 @@ export const newModelAssets: AssetCardContent[] = [
     credits: 4,
     size: 'small',
     aspectRatio: 'square',
+    category: 'Workspace',
+    brand: 'Forma Atelier',
+    description:
+      'Statement executive desk with integrated storage credenza and cable management routing for premium offices.',
+    downloadOptions: [
+      { label: 'Download 3D Model', size: '47.5 MB' },
+      { label: 'Download DWG', size: '33.4 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/3184452/pexels-photo-3184452.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/3184452/pexels-photo-3184452.jpeg?auto=compress&cs=tinysrgb&w=1000&h=750',
+      'https://images.pexels.com/photos/2451566/pexels-photo-2451566.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    ],
   },
   {
     id: 'model-plant-stand',
@@ -80,6 +152,19 @@ export const newModelAssets: AssetCardContent[] = [
     credits: 'free',
     size: 'small',
     aspectRatio: 'square',
+    category: 'Decoration',
+    brand: 'Greenlab',
+    description:
+      'Minimalist indoor planter with powder-coated frame and ceramic pot, ready to style interior corners.',
+    downloadOptions: [
+      { label: 'Download 3D Model', size: '18.9 MB' },
+      { label: 'Download OBJ', size: '16.2 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/6207814/pexels-photo-6207814.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/6207812/pexels-photo-6207812.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/6207804/pexels-photo-6207804.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    ],
   },
   {
     id: 'model-bar-stools',
@@ -93,6 +178,19 @@ export const newModelAssets: AssetCardContent[] = [
     credits: 6,
     size: 'small',
     aspectRatio: 'square',
+    category: 'Furniture',
+    brand: 'Urban Fabric',
+    description:
+      'Pair of oak bar stools with leather cushion detail, presented with both high and counter-height variations.',
+    downloadOptions: [
+      { label: 'Download 3D Model', size: '36.8 MB' },
+      { label: 'Download FBX', size: '34.5 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/279719/pexels-photo-279719.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/279639/pexels-photo-279639.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/373484/pexels-photo-373484.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    ],
   },
   {
     id: 'model-bedroom-set',
@@ -106,6 +204,19 @@ export const newModelAssets: AssetCardContent[] = [
     credits: 9,
     size: 'small',
     aspectRatio: 'square',
+    category: 'Bedroom',
+    brand: 'Staycozy',
+    description:
+      'Complete bedroom collection including bedframe, side tables, and lighting, styled for boutique hospitality suites.',
+    downloadOptions: [
+      { label: 'Download 3D Model', size: '72.2 MB' },
+      { label: 'Download SketchUp', size: '68.5 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/271632/pexels-photo-271632.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      'https://images.pexels.com/photos/262048/pexels-photo-262048.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    ],
   },
 ];
 
@@ -122,6 +233,19 @@ export const newSceneAssets: AssetCardContent[] = [
     credits: 'free',
     size: 'medium',
     aspectRatio: 'video',
+    category: 'Interior',
+    brand: 'Vista Studio',
+    description:
+      'Sunlit living room composition with modular seating, layered textiles, and ambient lighting calibrated for ray-traced renders.',
+    downloadOptions: [
+      { label: 'Download Scene (MAX)', size: '182 MB' },
+      { label: 'Download Unreal Package', size: '210 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1866149/pexels-photo-1866149.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
   {
     id: 'scene-bedroom',
@@ -135,6 +259,19 @@ export const newSceneAssets: AssetCardContent[] = [
     credits: 8,
     size: 'medium',
     aspectRatio: 'video',
+    category: 'Interior',
+    brand: 'Calme Atelier',
+    description:
+      'Layered bedroom set featuring soft indirect lighting, textured wall panels, and drapery simulations tuned for photoreal renders.',
+    downloadOptions: [
+      { label: 'Download Scene (Blend)', size: '236 MB' },
+      { label: 'Download Corona Ready', size: '198 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/262048/pexels-photo-262048.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
   {
     id: 'scene-kitchen',
@@ -148,6 +285,19 @@ export const newSceneAssets: AssetCardContent[] = [
     credits: 10,
     size: 'medium',
     aspectRatio: 'video',
+    category: 'Interior',
+    brand: 'Linea Forma',
+    description:
+      'High-end kitchen visualization with stone countertops, bronze fittings, and calibrated HDRI lighting for glossy surfaces.',
+    downloadOptions: [
+      { label: 'Download Scene (MAX)', size: '265 MB' },
+      { label: 'Download VRay Assets', size: '92 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1743231/pexels-photo-1743231.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1866149/pexels-photo-1866149.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/373484/pexels-photo-373484.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
   {
     id: 'scene-office',
@@ -161,6 +311,19 @@ export const newSceneAssets: AssetCardContent[] = [
     credits: 7,
     size: 'medium',
     aspectRatio: 'video',
+    category: 'Commercial',
+    brand: 'Lofty Labs',
+    description:
+      'Open-plan creative office with industrial structure, acoustic panels, and staged props for animation-ready storytelling.',
+    downloadOptions: [
+      { label: 'Download Scene (C4D)', size: '188 MB' },
+      { label: 'Download Texture Pack', size: '64 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/267885/pexels-photo-267885.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/2451566/pexels-photo-2451566.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/3184452/pexels-photo-3184452.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
   {
     id: 'scene-exterior-night',
@@ -174,6 +337,19 @@ export const newSceneAssets: AssetCardContent[] = [
     credits: 6,
     size: 'medium',
     aspectRatio: 'video',
+    category: 'Exterior',
+    brand: 'Nova Vis',
+    description:
+      'Twilight exterior villa scene with volumetric fog, animated water shaders, and layered vegetation proxies.',
+    downloadOptions: [
+      { label: 'Download Scene (MAX)', size: '312 MB' },
+      { label: 'Download Lumion Package', size: '280 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1933239/pexels-photo-1933239.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1933236/pexels-photo-1933236.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
   {
     id: 'scene-exterior-day',
@@ -187,6 +363,19 @@ export const newSceneAssets: AssetCardContent[] = [
     credits: 'free',
     size: 'medium',
     aspectRatio: 'video',
+    category: 'Exterior',
+    brand: 'Coastal Lab',
+    description:
+      'Tropical resort pool deck with animated foliage, caustic water shader, and daylight rig for bright marketing visuals.',
+    downloadOptions: [
+      { label: 'Download Scene (FBX)', size: '228 MB' },
+      { label: 'Download Unreal Package', size: '260 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
 ];
 
@@ -201,6 +390,18 @@ export const textureAssets: AssetCardContent[] = [
     credits: 'free',
     size: 'small',
     aspectRatio: 'square',
+    category: 'Wood',
+    brand: 'Material Forge',
+    description: 'High-resolution oak plank texture with seamless horizontal tiling and calibrated roughness maps.',
+    downloadOptions: [
+      { label: 'Download 4K PBR Pack', size: '48 MB' },
+      { label: 'Download 2K JPG', size: '12 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/326311/pexels-photo-326311.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/326310/pexels-photo-326310.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/345719/pexels-photo-345719.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
   {
     id: 'texture-marble',
@@ -212,6 +413,18 @@ export const textureAssets: AssetCardContent[] = [
     credits: 2,
     size: 'small',
     aspectRatio: 'square',
+    category: 'Stone',
+    brand: 'Surface Lab',
+    description: 'Italian calacatta marble texture with pronounced veining, delivered with normal and AO maps.',
+    downloadOptions: [
+      { label: 'Download 6K EXR Pack', size: '95 MB' },
+      { label: 'Download 4K JPG', size: '28 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1939485/pexels-photo-1939485.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1939487/pexels-photo-1939487.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1939484/pexels-photo-1939484.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
   {
     id: 'texture-concrete',
@@ -223,6 +436,18 @@ export const textureAssets: AssetCardContent[] = [
     credits: 'free',
     size: 'small',
     aspectRatio: 'square',
+    category: 'Concrete',
+    brand: 'Material Forge',
+    description: 'PBR concrete texture with subtle wear maps and neutral coloration, ideal for architectural visualization.',
+    downloadOptions: [
+      { label: 'Download 4K PBR Pack', size: '57 MB' },
+      { label: 'Download 1K JPG', size: '8 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1103971/pexels-photo-1103971.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1103972/pexels-photo-1103972.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
   {
     id: 'texture-brick',
@@ -234,6 +459,18 @@ export const textureAssets: AssetCardContent[] = [
     credits: 3,
     size: 'small',
     aspectRatio: 'square',
+    category: 'Brick',
+    brand: 'Built Surface',
+    description: 'Weathered brick wall material including displacement map for parallax-ready renders.',
+    downloadOptions: [
+      { label: 'Download 8K PBR Pack', size: '120 MB' },
+      { label: 'Download 4K JPG', size: '30 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1152237/pexels-photo-1152237.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/276528/pexels-photo-276528.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
   {
     id: 'texture-fabric',
@@ -245,6 +482,18 @@ export const textureAssets: AssetCardContent[] = [
     credits: 'free',
     size: 'small',
     aspectRatio: 'square',
+    category: 'Fabric',
+    brand: 'Softline',
+    description: 'Cozy knit textile with tileable weave structure and calibrated translucency maps.',
+    downloadOptions: [
+      { label: 'Download 4K PBR Pack', size: '44 MB' },
+      { label: 'Download 2K JPG', size: '10 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1029710/pexels-photo-1029710.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/1029767/pexels-photo-1029767.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/166148/pexels-photo-166148.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
   {
     id: 'texture-leather',
@@ -256,6 +505,18 @@ export const textureAssets: AssetCardContent[] = [
     credits: 4,
     size: 'small',
     aspectRatio: 'square',
+    category: 'Leather',
+    brand: 'LuxTex',
+    description: 'Premium leather texture with rich patina, delivered with roughness and normal maps for product renders.',
+    downloadOptions: [
+      { label: 'Download 6K PBR Pack', size: '88 MB' },
+      { label: 'Download 3K JPG', size: '22 MB' },
+    ],
+    gallery: [
+      'https://images.pexels.com/photos/1909791/pexels-photo-1909791.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/298863/pexels-photo-298863.jpeg?auto=compress&cs=tinysrgb&w=1400',
+      'https://images.pexels.com/photos/113745/pexels-photo-113745.jpeg?auto=compress&cs=tinysrgb&w=1400',
+    ],
   },
 ];
 

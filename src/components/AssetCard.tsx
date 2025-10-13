@@ -1,4 +1,5 @@
 import { Eye, Heart, Download } from 'lucide-react';
+import { useI18n } from '../i18n/I18nProvider';
 
 export interface AssetCardProps {
   image: string;
@@ -37,10 +38,14 @@ export function AssetCard({
     portrait: 'aspect-[3/4]',
   };
 
+  const { t } = useI18n();
+
   const badgeClasses =
     credits === 'free'
       ? 'bg-yellow-400 text-gray-900'
       : 'bg-gray-900 text-white';
+
+  const creditLabel = credits === 'free' ? t('asset.free') : t('asset.credits', { count: credits });
 
   return (
     <div className="group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
@@ -48,7 +53,7 @@ export function AssetCard({
         <span
           className={`absolute top-4 left-4 z-10 px-4 py-1.5 rounded-full text-sm font-bold ${badgeClasses}`}
         >
-          {credits === 'free' ? 'Free' : `${credits} Credits`}
+          {creditLabel}
         </span>
         <img
           src={image}
