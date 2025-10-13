@@ -68,7 +68,7 @@ function App() {
           <div className="flex items-center gap-6 h-20">
             <div className="flex items-center">
               <Link to="/" className="text-2xl font-bold tracking-wide">
-                ILMIORA
+                LARUUS
               </Link>
             </div>
 
@@ -265,7 +265,7 @@ function App() {
           </div>
 
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-2xl font-bold tracking-wide">ILMIORA</div>
+            <div className="text-2xl font-bold tracking-wide">LARUUS</div>
             <div className="flex space-x-6">
               <a href="#" className="text-gray-500 hover:text-white">
                 <Facebook className="h-5 w-5" />

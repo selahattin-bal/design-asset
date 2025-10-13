@@ -224,7 +224,7 @@ export const translations: Translations = {
       privacy: 'Privacy',
       cookies: 'Cookies',
       licenses: 'Licenses',
-      copyright: '© {{year}} Ilmiora. All rights reserved.',
+      copyright: '© {{year}} LARUUS. All rights reserved.',
     },
   },
   tr: {
@@ -446,7 +446,7 @@ export const translations: Translations = {
       privacy: 'Gizlilik',
       cookies: 'Çerezler',
       licenses: 'Lisanslar',
-      copyright: '© {{year}} Ilmiora. Tüm hakları saklıdır.',
+      copyright: '© {{year}} LARUUS. Tüm hakları saklıdır.',
     },
   },
 };

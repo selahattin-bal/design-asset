@@ -10,7 +10,7 @@ type I18nContextValue = {
   languages: Language[];
 };
 
-const I18N_STORAGE_KEY = 'ilmiora.language';
+const I18N_STORAGE_KEY = 'LARUUS.language';
 
 const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 

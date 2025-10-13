@@ -101,7 +101,7 @@ export const newModelAssets: AssetCardContent[] = [
     size: 'small',
     aspectRatio: 'square',
     category: 'Furniture',
-    brand: 'Ilmiora Studio',
+    brand: 'LARUUS Studio',
     description:
       'Plush three-seater sofa with soft cushions and rounded edges, perfect for contemporary living spaces.',
     downloadOptions: [
