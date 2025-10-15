@@ -1,0 +1,27 @@
+{
+  "name": "design-asset-be",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+  "build": "tsc --noEmit && esbuild src/handlers/auth.ts --bundle --platform=node --target=node18 --format=cjs --outdir=dist",
+    "lint": "echo \"No lint command configured\"",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.609.0",
+    "@aws-sdk/lib-dynamodb": "^3.609.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^9.0.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.132",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/uuid": "^10.0.0",
+    "esbuild": "^0.21.5",
+    "typescript": "^5.4.5"
+  }
+}

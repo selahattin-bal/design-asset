@@ -2,6 +2,8 @@ import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Chrome } from 'lucide-react';
 import { useI18n } from '../i18n/I18nProvider';
+import { signUp } from '../services/authService';
+import { ApiError } from '../services/apiClient';
 
 type SubmitState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -25,17 +27,20 @@ export function SignUpPage() {
     setMessage('');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      if (import.meta.env.DEV) {
-        console.info('[auth] POST /api/auth/register', { email });
-      }
+      const response = await signUp({ email, password });
       setState('success');
-      setMessage(t('authPages.common.successMessage'));
+      setMessage(response.message ?? t('authPages.common.successMessage'));
+      setPassword('');
+      setConfirmPassword('');
     } catch (error) {
       setState('error');
-      setMessage(t('authPages.common.errorMessage'));
+      if (error instanceof ApiError) {
+        setMessage(error.message);
+      } else {
+        setMessage(t('authPages.common.errorMessage'));
+      }
       if (import.meta.env.DEV) {
-        console.error(error);
+        console.error('Sign up failed', error);
       }
     }
   };
