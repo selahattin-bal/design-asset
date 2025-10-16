@@ -2,10 +2,12 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import type { JwtPayload } from 'jsonwebtoken';
 import { getEnv } from './env.js';
+import type { UserRole } from './roles.js';
 
 type TokenPayload = {
   sub: string;
   email: string;
+  role: UserRole;
   scope: 'access' | 'refresh';
 };
 
@@ -16,13 +18,13 @@ type Tokens = {
   refreshExpiresIn: number;
 };
 
-export const hashPassword = (password: string): string => bcrypt.hashSync(password, 12);
+export const hashPassword = (password: string): string => bcrypt.hashSync(password, 10);
 export const verifyPassword = (password: string, hash: string): boolean => bcrypt.compareSync(password, hash);
 
-export const createTokens = (userId: string, email: string): Tokens => {
+export const createTokens = (userId: string, email: string, role: UserRole): Tokens => {
   const env = getEnv();
-  const accessPayload: TokenPayload = { sub: userId, email, scope: 'access' };
-  const refreshPayload: TokenPayload = { sub: userId, email, scope: 'refresh' };
+  const accessPayload: TokenPayload = { sub: userId, email, role, scope: 'access' };
+  const refreshPayload: TokenPayload = { sub: userId, email, role, scope: 'refresh' };
 
   const accessToken = jwt.sign(accessPayload, env.jwtSecret, { expiresIn: env.tokenTtlSeconds });
   const refreshToken = jwt.sign(refreshPayload, env.jwtSecret, { expiresIn: env.refreshTtlSeconds });

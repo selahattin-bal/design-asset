@@ -82,6 +82,11 @@ export const signIn = async (payload: AuthRequest): Promise<AuthResponse> => {
       body: JSON.stringify(payload),
     });
     persistTokens(response.tokens);
+
+    if (response.user) {
+      window.localStorage.setItem('user', JSON.stringify(response.user));
+    }
+
     return response;
   } catch (error) {
     if (error instanceof ApiError) {

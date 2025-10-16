@@ -35,7 +35,6 @@ export const apiFetch = async <TResponse = unknown>(
 ): Promise<TResponse> => {
   const { parse = 'json', headers, ...rest } = options;
   const response = await fetch(buildUrl(path), {
-    credentials: 'include',
     ...rest,
     headers: {
       'Content-Type': 'application/json',

@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Chrome } from 'lucide-react';
 import { useI18n } from '../i18n/I18nProvider';
 import { signUp } from '../services/authService';
@@ -14,6 +14,7 @@ export function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [state, setState] = useState<SubmitState>('idle');
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -32,6 +33,7 @@ export function SignUpPage() {
       setMessage(response.message ?? t('authPages.common.successMessage'));
       setPassword('');
       setConfirmPassword('');
+      navigate('/signin');
     } catch (error) {
       setState('error');
       if (error instanceof ApiError) {

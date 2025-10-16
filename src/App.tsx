@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Search, ChevronDown, Menu, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 import { Link, NavLink, Routes, Route, useLocation } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
@@ -14,11 +14,31 @@ import { SignUpPage } from './pages/SignUpPage';
 import { useI18n } from './i18n/I18nProvider';
 import { availableLanguages } from './i18n/translations';
 
+type StoredUser = {
+  id: string;
+  email: string;
+  createdAt?: string;
+};
+
 function App() {
   const { t, language, setLanguage } = useI18n();
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
+
+  const readUserFromStorage = useCallback((): StoredUser | null => {
+    try {
+      const storedUser = window.localStorage.getItem('user');
+      return storedUser ? (JSON.parse(storedUser) as StoredUser) : null;
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Failed to parse stored user info', error);
+      }
+      return null;
+    }
+  }, []);
+
+  const [user, setUser] = useState<StoredUser | null>(() => readUserFromStorage());
 
   const categories = [
     'filters.furniture',
@@ -60,6 +80,27 @@ function App() {
     // Close the language menu whenever the visible route changes
     setLanguageMenuOpen(false);
   }, [location.pathname]);
+
+  const handleLogout = () => {
+    window.localStorage.removeItem('user');
+    setUser(null);
+  };
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setUser(readUserFromStorage());
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [readUserFromStorage]);
+
+  useEffect(() => {
+    setUser(readUserFromStorage());
+  }, [location.key, readUserFromStorage]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -164,18 +205,33 @@ function App() {
             </div>
 
             <div className="ml-auto flex items-center gap-4">
-              <Link
-                to="/signin"
-                className="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-gray-200 hover:text-white transition-colors"
-              >
-                {t('auth.signIn')}
-              </Link>
-              <Link
-                to="/signup"
-                className="hidden md:inline-flex items-center px-4 py-2 rounded-full text-sm font-medium text-black bg-white hover:bg-gray-200 transition-colors"
-              >
-                {t('auth.signUp')}
-              </Link>
+              {user ? (
+                <>
+                  <span className="text-sm font-medium text-gray-200">{user.email}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 text-sm font-medium text-gray-200 hover:text-white transition-colors"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/signin"
+                    className="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-gray-200 hover:text-white transition-colors"
+                  >
+                    {t('auth.signIn')}
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="hidden md:inline-flex items-center px-4 py-2 rounded-full text-sm font-medium text-black bg-white hover:bg-gray-200 transition-colors"
+                  >
+                    {t('auth.signUp')}
+                  </Link>
+                </>
+              )}
+
               <div className="relative" ref={languageMenuRef}>
                 <button
                   type="button"

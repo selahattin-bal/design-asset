@@ -8,7 +8,9 @@ export const getDocumentClient = (): DynamoDBDocumentClient => {
     return cachedDocumentClient;
   }
 
-  const client = new DynamoDBClient({});
+  const client = new DynamoDBClient({
+    region: process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION,
+  });
   cachedDocumentClient = DynamoDBDocumentClient.from(client, {
     marshallOptions: { removeUndefinedValues: true },
   });

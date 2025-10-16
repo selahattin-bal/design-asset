@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Chrome } from 'lucide-react';
 import { useI18n } from '../i18n/I18nProvider';
 import { signIn } from '../services/authService';
@@ -9,6 +9,7 @@ type SubmitState = 'idle' | 'loading' | 'success' | 'error';
 
 export function SignInPage() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [state, setState] = useState<SubmitState>('idle');
@@ -24,6 +25,12 @@ export function SignInPage() {
       setState('success');
       setMessage(response.message ?? t('authPages.common.successMessage'));
       setPassword('');
+
+      if (response.user) {
+        window.localStorage.setItem('user', JSON.stringify(response.user));
+      }
+
+      navigate('/');
     } catch (error) {
       setState('error');
       if (error instanceof ApiError) {
