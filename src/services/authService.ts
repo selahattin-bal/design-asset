@@ -13,6 +13,13 @@ type AuthResponse = {
     id: string;
     email: string;
     createdAt?: string;
+    role?: string;
+    credits?: {
+      period: 'daily' | 'monthly';
+      limit: number;
+      balance: number;
+      resetAt: string;
+    };
   };
   tokens?: {
     accessToken: string;
@@ -20,6 +27,14 @@ type AuthResponse = {
     expiresIn: number;
     refreshExpiresIn: number;
   };
+};
+
+type ForgotPasswordRequest = {
+  email: string;
+};
+
+type ForgotPasswordResponse = {
+  message: string;
 };
 
 type StoredTokens = {
@@ -93,6 +108,22 @@ export const signIn = async (payload: AuthRequest): Promise<AuthResponse> => {
       throw error;
     }
     throw new ApiError(500, 'Unable to sign in.');
+  }
+};
+
+export const requestPasswordReset = async (
+  payload: ForgotPasswordRequest,
+): Promise<ForgotPasswordResponse> => {
+  try {
+    return await apiFetch<ForgotPasswordResponse>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(500, 'Unable to send password reset request.');
   }
 };
 

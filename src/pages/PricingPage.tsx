@@ -8,7 +8,7 @@ type CreditFrequency = 'month' | 'pack';
 type BillingFrequency = 'monthly' | 'yearly';
 
 type PlanConfig = {
-  id: 'onDemand' | 'basic' | 'premium' | 'pro' | 'team';
+  id: 'basic' | 'premium' | 'pro';
   price: Record<Currency, number>;
   creditOptions: number[];
   paymentType: BillingFrequency;
@@ -18,38 +18,24 @@ type PlanConfig = {
 
 const plans: PlanConfig[] = [
   {
-    id: 'onDemand',
-    price: { usd: 24.99, try: 699.99 },
-    creditOptions: [20, 50, 120],
-    paymentType: 'yearly',
-    creditType: 'pack',
-  },
-  {
     id: 'basic',
-    price: { usd: 4.99, try: 139.99 },
-    creditOptions: [20, 50, 120],
+    price: { usd: 14.99, try: 399.99 },
+    creditOptions: [200],
     paymentType: 'monthly',
     creditType: 'month',
   },
   {
     id: 'premium',
-    price: { usd: 19.99, try: 549.99 },
-    creditOptions: [120, 300, 600],
+    price: { usd: 39.99, try: 1099.99 },
+    creditOptions: [500],
     paymentType: 'monthly',
     creditType: 'month',
     highlight: true,
   },
   {
     id: 'pro',
-    price: { usd: 199, try: 5499 },
-    creditOptions: [1200],
-    paymentType: 'monthly',
-    creditType: 'month',
-  },
-  {
-    id: 'team',
-    price: { usd: 499, try: 13999 },
-    creditOptions: [1500],
+    price: { usd: 79.99, try: 2199.99 },
+    creditOptions: [1000],
     paymentType: 'monthly',
     creditType: 'month',
   },
@@ -118,7 +104,7 @@ export function PricingPage() {
       </section>
 
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 justify-center">
           {plans.map(plan => {
             const name = t(`pricingPage.plans.${plan.id}.name`);
             const description = t(`pricingPage.plans.${plan.id}.description`);

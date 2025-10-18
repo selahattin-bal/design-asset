@@ -4,7 +4,7 @@ import type { JwtPayload } from 'jsonwebtoken';
 import { getEnv } from './env.js';
 import type { UserRole } from './roles.js';
 
-type TokenPayload = {
+export type TokenPayload = {
   sub: string;
   email: string;
   role: UserRole;
@@ -42,6 +42,20 @@ export const decodeToken = (token: string): JwtPayload | null => {
     return jwt.decode(token, { json: true });
   } catch (error) {
     console.error('Failed to decode token', error);
+    return null;
+  }
+};
+
+export const verifyAccessToken = (token: string): TokenPayload | null => {
+  try {
+    const env = getEnv();
+    const payload = jwt.verify(token, env.jwtSecret) as TokenPayload;
+    if (payload.scope !== 'access') {
+      return null;
+    }
+    return payload;
+  } catch (error) {
+    console.error('Failed to verify access token', error);
     return null;
   }
 };

@@ -1,4 +1,5 @@
-const defaultBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '');
+const fallbackBaseUrl = 'https://fxappkyrnh.execute-api.eu-north-1.amazonaws.com';
+const defaultBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? fallbackBaseUrl).replace(/\/$/, '');
 
 export class ApiError extends Error {
   status: number;

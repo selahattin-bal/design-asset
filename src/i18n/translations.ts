@@ -17,6 +17,9 @@ export const translations: Translations = {
       allModels: 'All 3D Models',
       allScenes: 'All 3D Scenes',
       pricing: 'Pricing',
+      myAssets: 'My Assets',
+      cart: 'Cart',
+      dashboard: 'Dashboard',
     },
     hero: {
       titleLine1: 'The First Digital Platform',
@@ -31,6 +34,7 @@ export const translations: Translations = {
       signIn: 'Sign In',
       signUp: 'Sign Up',
     },
+      dashboard: 'Yönetim',
     authPages: {
       common: {
         emailLabel: 'Email',
@@ -62,6 +66,13 @@ export const translations: Translations = {
           'By registering you agree to our <a class="font-semibold text-gray-900 hover:underline" href="#">Terms of Service</a> and <a class="font-semibold text-gray-900 hover:underline" href="#">Privacy Policy</a>.',
         secondaryPrompt: 'Already have an account?',
         secondaryAction: 'Sign in',
+      },
+      forgotPassword: {
+        title: 'Reset your password',
+        subtitle: 'Enter your email and we will send you instructions to create a new password.',
+        submitLabel: 'Send reset link',
+        successMessage: 'If an account exists, we sent password reset instructions to your email.',
+        backToSignIn: 'Back to sign in',
       },
     },
     language: {
@@ -141,36 +152,23 @@ export const translations: Translations = {
         badgeBestValue: 'Best Value',
       },
       plans: {
-        onDemand: {
-          name: 'On-Demand',
-          description: 'Download the 3D models you need, whenever you need them. Single user.',
-          payment: 'pricingPage.planLabels.paymentYearly',
-          creditsLabel: 'pricingPage.planLabels.creditsPerPack',
-        },
         basic: {
           name: 'Basic',
-          description: 'Pick the right amount of 3D models each month. Perfect for lighter workloads.',
+          description: '200 monthly credits to download essential 3D assets for lighter workloads.',
           payment: 'pricingPage.planLabels.paymentMonthly',
           creditsLabel: 'pricingPage.planLabels.creditsPerMonth',
         },
         premium: {
           name: 'Premium',
-          description: 'Download as many 3D models as you need with generous monthly credits.',
+          description: '500 monthly credits for professional designers who need a larger library.',
           payment: 'pricingPage.planLabels.paymentMonthly',
           creditsLabel: 'pricingPage.planLabels.creditsPerMonth',
         },
         pro: {
           name: 'Pro',
-          description: 'Advanced users who need large amounts of credits for demanding projects.',
+          description: '1000 monthly credits for studios handling intensive 3D production workloads.',
           payment: 'pricingPage.planLabels.paymentMonthly',
           creditsLabel: 'pricingPage.planLabels.creditsPerMonth',
-        },
-        team: {
-          name: 'Team',
-          description: 'Collaborate with your team and share a large pool of credits across members.',
-          payment: 'pricingPage.planLabels.paymentMonthly',
-          creditsLabel: 'pricingPage.planLabels.creditsPerMonth',
-          note: 'Up to 10 team members',
         },
       },
       actions: {
@@ -187,12 +185,12 @@ export const translations: Translations = {
           answer: 'Yes. Choose your preferred currency at checkout. You can update it before the next renewal.',
         },
         q3: {
-          question: 'Is the On-Demand pack refundable?',
-          answer: 'On-Demand purchases are final, but you can upgrade to a subscription within 7 days for a prorated credit.',
+          question: 'Can I change plans later?',
+          answer: 'You can upgrade or downgrade at any time. Unused credits stay available for 30 days after the change.',
         },
         q4: {
-          question: 'Can I invite more team members later?',
-          answer: 'Team plans support up to 10 members. Contact support if you need a larger seat count.',
+          question: 'How do credit resets work?',
+          answer: 'Credits refresh automatically at the end of each billing cycle. Free plans refresh every day.',
         },
         q5: {
           question: 'Do credits expire?',
@@ -226,6 +224,64 @@ export const translations: Translations = {
       licenses: 'Licenses',
       copyright: '© {{year}} LARUUS. All rights reserved.',
     },
+    profile: {
+      accountSettings: 'Account settings',
+      signOut: 'Sign out',
+    },
+    account: {
+      profile: {
+        anonymous: 'Guest user',
+        roleLabel: 'Interior design enthusiast',
+        upgradeCta: 'Upgrade plan',
+      },
+      sidebar: {
+        plan: {
+          label: 'Plan',
+          valueFree: 'Free plan',
+          dailyCredits: 'Daily limit: {{limit}} credits',
+          monthlyCredits: 'Monthly limit: {{limit}} credits',
+        },
+        billing: {
+          label: 'Billing',
+          value: 'Manage invoices and receipts',
+        },
+        paymentMethods: {
+          label: 'Payment methods',
+          value: 'Add or update your cards',
+        },
+        collections: {
+          label: 'Collections',
+          value: '0 active collections',
+        },
+        purchases: {
+          label: 'Purchases',
+          value: '0 recent purchases',
+        },
+        editProfile: {
+          label: 'Edit profile',
+          value: 'Customize your public page',
+        },
+      },
+      content: {
+        placeholderTitle: 'Choose an option from the sidebar',
+        placeholderSubtitle:
+          'We will show detailed settings here once the selected module is implemented.',
+        activityTitle: 'Quick activity overview',
+        activitySubtitle: 'A snapshot of your collections and purchases will appear in this area.',
+        profileTitle: 'Profile preferences',
+        profileSubtitle: 'Manage your personal information and security options.',
+        profileDetailsTitle: 'Public profile',
+        profileDetailsSubtitle: 'Update your display name and portfolio details (coming soon).',
+        profileEditCta: 'Edit profile',
+        resetPasswordTitle: 'Reset your password',
+        resetPasswordSubtitle: 'Need a new password? We will send a secure reset link to your inbox.',
+        resetPasswordCta: 'Send reset email',
+        resetPasswordHint: 'You will be redirected to the password reset form on the next page.',
+  creditSummaryTitle: 'Credit balance',
+  creditSummaryBalance: '{{balance}} credits remaining out of {{limit}}',
+  creditSummaryReset: 'Resets on {{date}}',
+      },
+    },
   },
   tr: {
     nav: {
@@ -239,6 +295,8 @@ export const translations: Translations = {
       allModels: 'Tüm 3D Modeller',
       allScenes: 'Tüm 3D Sahne',
       pricing: 'Fiyatlandırma',
+      myAssets: 'Varlıklarım',
+      cart: 'Sepet',
     },
     hero: {
       titleLine1: 'İlk Dijital Platform',
@@ -284,6 +342,13 @@ export const translations: Translations = {
           'Kayıt olarak <a class="font-semibold text-gray-900 hover:underline" href="#">Hizmet Şartlarımızı</a> ve <a class="font-semibold text-gray-900 hover:underline" href="#">Gizlilik Politikamızı</a> kabul etmiş olursunuz.',
         secondaryPrompt: 'Zaten hesabınız var mı?',
         secondaryAction: 'Giriş yapın',
+      },
+      forgotPassword: {
+        title: 'Şifrenizi sıfırlayın',
+        subtitle: 'E-postanızı girin, yeni bir şifre oluşturmanız için bağlantı gönderelim.',
+        submitLabel: 'Sıfırlama bağlantısı gönder',
+        successMessage: 'Hesabınız varsa şifre sıfırlama talimatlarını e-postanıza gönderdik.',
+        backToSignIn: 'Giriş ekranına dön',
       },
     },
     language: {
@@ -363,36 +428,23 @@ export const translations: Translations = {
         badgeBestValue: 'En iyi seçenek',
       },
       plans: {
-        onDemand: {
-          name: 'İhtiyaç Halinde',
-          description: 'Gerektiğinde 3D modeller indirin. Tek kullanıcı.',
-          payment: 'pricingPage.planLabels.paymentYearly',
-          creditsLabel: 'pricingPage.planLabels.creditsPerPack',
-        },
         basic: {
           name: 'Temel',
-          description: 'Aylık hafif ihtiyaçlar için doğru kredi miktarını seçin. Tek kullanıcı.',
+          description: '200 aylık krediyle hafif projeler için gerekli 3D varlıkları indirin.',
           payment: 'pricingPage.planLabels.paymentMonthly',
           creditsLabel: 'pricingPage.planLabels.creditsPerMonth',
         },
         premium: {
           name: 'Premium',
-          description: 'Geniş aylık kredilerle ihtiyaç duyduğunuz kadar 3D model indirin.',
+          description: '500 aylık kredi profesyonel tasarımcıların daha büyük arşive erişmesini sağlar.',
           payment: 'pricingPage.planLabels.paymentMonthly',
           creditsLabel: 'pricingPage.planLabels.creditsPerMonth',
         },
         pro: {
           name: 'Profesyonel',
-          description: 'Yoğun projeler için yüksek kredi limitine sahip gelişmiş kullanıcılar.',
+          description: '1000 aylık kredi yoğun 3D üretim süreçlerini yöneten stüdyolar için idealdir.',
           payment: 'pricingPage.planLabels.paymentMonthly',
           creditsLabel: 'pricingPage.planLabels.creditsPerMonth',
-        },
-        team: {
-          name: 'Takım',
-          description: 'Ekibinizle iş birliği yapın ve ortak kredi havuzunu paylaşın.',
-          payment: 'pricingPage.planLabels.paymentMonthly',
-          creditsLabel: 'pricingPage.planLabels.creditsPerMonth',
-          note: '10 ekip üyesine kadar',
         },
       },
       actions: {
@@ -409,12 +461,12 @@ export const translations: Translations = {
           answer: 'Evet. Ödeme sırasında tercih ettiğiniz para birimini seçebilirsiniz. Yenilemeden önce güncelleyebilirsiniz.',
         },
         q3: {
-          question: 'İhtiyaç Halinde paketi iade edebilir miyim?',
-          answer: 'İhtiyaç Halinde satın alımları iade edilmez, ancak 7 gün içinde aboneliğe yükseltirseniz orantılı kredi eklenir.',
+          question: 'Planımı daha sonra değiştirebilir miyim?',
+          answer: 'İstediğiniz zaman plan yükseltebilir veya düşürebilirsiniz. Kullanılmayan krediler değişiklikten sonra 30 gün daha kullanılabilir.',
         },
         q4: {
-          question: 'Daha sonra daha fazla ekip üyesi davet edebilir miyim?',
-          answer: 'Takım planları 10 üyeye kadar destekler. Daha fazla koltuk için destek ile iletişime geçin.',
+          question: 'Kredi yenilemesi nasıl çalışır?',
+          answer: 'Krediler her fatura döneminin sonunda otomatik olarak yenilenir. Ücretsiz planlar her gün yenilenir.',
         },
         q5: {
           question: 'Kredilerim ne zaman sona erer?',
@@ -447,6 +499,64 @@ export const translations: Translations = {
       cookies: 'Çerezler',
       licenses: 'Lisanslar',
       copyright: '© {{year}} LARUUS. Tüm hakları saklıdır.',
+    },
+    profile: {
+      accountSettings: 'Hesap ayarları',
+      signOut: 'Çıkış yap',
+    },
+    account: {
+      profile: {
+        anonymous: 'Misafir kullanıcı',
+        roleLabel: 'İç tasarım meraklısı',
+        upgradeCta: 'Planı yükselt',
+      },
+      sidebar: {
+        plan: {
+          label: 'Plan',
+          valueFree: 'Ücretsiz plan',
+          dailyCredits: 'Günlük limit: {{limit}} kredi',
+          monthlyCredits: 'Aylık limit: {{limit}} kredi',
+        },
+        billing: {
+          label: 'Faturalandırma',
+          value: 'Faturaları ve makbuzları yönetin',
+        },
+        paymentMethods: {
+          label: 'Ödeme yöntemleri',
+          value: 'Kart ekleyin veya güncelleyin',
+        },
+        collections: {
+          label: 'Koleksiyonlar',
+          value: '0 aktif koleksiyon',
+        },
+        purchases: {
+          label: 'Satın almalar',
+          value: '0 son satın alma',
+        },
+        editProfile: {
+          label: 'Profili düzenle',
+          value: 'Herkese açık sayfanı kişiselleştir',
+        },
+      },
+      content: {
+        placeholderTitle: 'Menüden bir seçenek seçin',
+        placeholderSubtitle:
+          'Seçilen modül hazır olduğunda ayrıntılı ayarları burada göstereceğiz.',
+        activityTitle: 'Hızlı etkinlik özeti',
+        activitySubtitle: 'Koleksiyon ve satın alma özetleri bu alanda görünecek.',
+        profileTitle: 'Profil tercihleri',
+        profileSubtitle: 'Kişisel bilgilerinizi ve güvenlik ayarlarınızı yönetin.',
+        profileDetailsTitle: 'Herkese açık profil',
+        profileDetailsSubtitle: 'Görünen adınızı ve portföy detaylarını güncelleyin (yakında).',
+        profileEditCta: 'Profili düzenle',
+        resetPasswordTitle: 'Şifreyi sıfırla',
+        resetPasswordSubtitle: 'Yeni bir şifreye mi ihtiyacınız var? Güvenli bağlantıyı e-postanıza gönderelim.',
+        resetPasswordCta: 'Şifre sıfırlama e-postası gönder',
+        resetPasswordHint: 'Bir sonraki sayfada şifre sıfırlama formuna yönlendirileceksiniz.',
+  creditSummaryTitle: 'Kredi bakiyesi',
+  creditSummaryBalance: '{{limit}} krediden {{balance}} kaldı',
+  creditSummaryReset: '{{date}} tarihinde yenilenir',
+      },
     },
   },
 };

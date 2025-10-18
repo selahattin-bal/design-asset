@@ -4,13 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-  "build": "tsc --noEmit && esbuild src/handlers/auth.ts --bundle --platform=node --target=node18 --format=cjs --outdir=dist",
+  "build": "tsc --noEmit && esbuild src/handlers/auth.ts src/handlers/assets.ts --bundle --platform=node --target=node18 --format=cjs --outdir=dist",
     "lint": "echo \"No lint command configured\"",
     "test": "echo \"No tests yet\""
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.609.0",
     "@aws-sdk/lib-dynamodb": "^3.609.0",
+    "@aws-sdk/client-ses": "^3.609.0",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
     "uuid": "^9.0.1",

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Search, ChevronDown, Menu, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
-import { Link, NavLink, Routes, Route, useLocation } from 'react-router-dom';
+import { Search, ChevronDown, Menu, Facebook, Instagram, Twitter, Youtube, Bookmark, ShoppingCart } from 'lucide-react';
+import { Link, NavLink, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
 import { ModelsPage } from './pages/ModelsPage';
 import { ModelDetailPage } from './pages/ModelDetailPage';
@@ -11,19 +11,34 @@ import { TextureDetailPage } from './pages/TextureDetailPage';
 import { PricingPage } from './pages/PricingPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { AccountSettingsPage } from './pages/AccountSettingsPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { useI18n } from './i18n/I18nProvider';
 import { availableLanguages } from './i18n/translations';
+import { clearTokens } from './services/authService';
 
 type StoredUser = {
   id: string;
   email: string;
   createdAt?: string;
+  role?: string;
+  credits?: {
+    period: 'daily' | 'monthly';
+    limit: number;
+    balance: number;
+    resetAt: string;
+  };
 };
 
 function App() {
   const { t, language, setLanguage } = useI18n();
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<'models' | 'scenes' | null>(null);
   const languageMenuRef = useRef<HTMLDivElement | null>(null);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
+  const dropdownCloseTimerRef = useRef<number | null>(null);
   const location = useLocation();
 
   const readUserFromStorage = useCallback((): StoredUser | null => {
@@ -77,13 +92,45 @@ function App() {
   }, [languageMenuOpen]);
 
   useEffect(() => {
-    // Close the language menu whenever the visible route changes
+    if (!profileMenuOpen) {
+      return;
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [profileMenuOpen]);
+
+  useEffect(() => {
+    if (dropdownCloseTimerRef.current) {
+      window.clearTimeout(dropdownCloseTimerRef.current);
+      dropdownCloseTimerRef.current = null;
+    }
+
+    setOpenDropdown(null);
+    // Close menus whenever the visible route changes
     setLanguageMenuOpen(false);
+    setProfileMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    return () => {
+      if (dropdownCloseTimerRef.current) {
+        window.clearTimeout(dropdownCloseTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleLogout = () => {
     window.localStorage.removeItem('user');
+    clearTokens();
     setUser(null);
+    setProfileMenuOpen(false);
   };
 
   useEffect(() => {
@@ -102,11 +149,15 @@ function App() {
     setUser(readUserFromStorage());
   }, [location.key, readUserFromStorage]);
 
+  const userInitial = user?.email?.[0]?.toUpperCase() ?? '?';
+  const userHandle = user?.email?.split('@')[0] ?? '';
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <header className="bg-gray-950 text-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-6 h-20">
+      {user?.role !== 'ADMIN' && (
+        <header className="bg-gray-950 text-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-6 h-20">
             <div className="flex items-center">
               <Link to="/" className="text-2xl font-bold tracking-wide">
                 LARUUS
@@ -114,13 +165,37 @@ function App() {
             </div>
 
             <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-gray-300">
-              <div className="relative group">
+              <div
+                className="relative"
+                onMouseEnter={() => {
+                  if (dropdownCloseTimerRef.current) {
+                    window.clearTimeout(dropdownCloseTimerRef.current);
+                    dropdownCloseTimerRef.current = null;
+                  }
+                  setOpenDropdown('models');
+                }}
+                onMouseLeave={() => {
+                  dropdownCloseTimerRef.current = window.setTimeout(() => setOpenDropdown(null), 150);
+                }}
+              >
                 <NavLink to="/models" className={navLinkClass}>
                   {t('nav.models')}
                   <ChevronDown className="h-4 w-4" />
                 </NavLink>
                 {/* Dropdown menu for 3D Models */}
-                <div className="absolute left-0 top-full z-20 mt-3 w-[760px] rounded-3xl bg-gray-900/95 backdrop-blur shadow-2xl border border-gray-800 p-8 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200">
+                <div
+                  onMouseEnter={() => {
+                    if (dropdownCloseTimerRef.current) {
+                      window.clearTimeout(dropdownCloseTimerRef.current);
+                      dropdownCloseTimerRef.current = null;
+                    }
+                    setOpenDropdown('models');
+                  }}
+                  onMouseLeave={() => {
+                    dropdownCloseTimerRef.current = window.setTimeout(() => setOpenDropdown(null), 150);
+                  }}
+                  className={`absolute left-0 top-full z-20 mt-3 w-[760px] rounded-3xl bg-gray-900/95 backdrop-blur shadow-2xl border border-gray-800 p-8 ${openDropdown === 'models' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-opacity duration-200`}
+                >
                   <div className="flex flex-col gap-8">
                     <div>
                       <div className="text-base font-semibold text-white mb-5">{t('nav.models')}</div>
@@ -152,12 +227,36 @@ function App() {
                   </div>
                 </div>
               </div>
-              <div className="relative group">
+              <div
+                className="relative"
+                onMouseEnter={() => {
+                  if (dropdownCloseTimerRef.current) {
+                    window.clearTimeout(dropdownCloseTimerRef.current);
+                    dropdownCloseTimerRef.current = null;
+                  }
+                  setOpenDropdown('scenes');
+                }}
+                onMouseLeave={() => {
+                  dropdownCloseTimerRef.current = window.setTimeout(() => setOpenDropdown(null), 150);
+                }}
+              >
                 <NavLink to="/scenes" className={navLinkClass}>
                   {t('nav.scenes')}
                   <ChevronDown className="h-4 w-4" />
                 </NavLink>
-                <div className="absolute left-0 top-full z-20 mt-3 w-[760px] rounded-3xl bg-gray-900/95 backdrop-blur shadow-2xl border border-gray-800 p-8 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200">
+                <div
+                  onMouseEnter={() => {
+                    if (dropdownCloseTimerRef.current) {
+                      window.clearTimeout(dropdownCloseTimerRef.current);
+                      dropdownCloseTimerRef.current = null;
+                    }
+                    setOpenDropdown('scenes');
+                  }}
+                  onMouseLeave={() => {
+                    dropdownCloseTimerRef.current = window.setTimeout(() => setOpenDropdown(null), 150);
+                  }}
+                  className={`absolute left-0 top-full z-20 mt-3 w-[760px] rounded-3xl bg-gray-900/95 backdrop-blur shadow-2xl border border-gray-800 p-8 ${openDropdown === 'scenes' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-opacity duration-200`}
+                >
                   <div className="flex flex-col gap-8">
                     <div>
                       <div className="text-base font-semibold text-white mb-5">{t('nav.scenes')}</div>
@@ -191,6 +290,11 @@ function App() {
               <NavLink to="/pricing" className={navLinkClass}>
                 {t('nav.pricing')}
               </NavLink>
+              {user?.role === 'ADMIN' && (
+                <NavLink to="/admin" className={navLinkClass}>
+                  {t('nav.dashboard')}
+                </NavLink>
+              )}
             </nav>
 
             <div className="hidden md:flex flex-1 justify-center">
@@ -207,13 +311,57 @@ function App() {
             <div className="ml-auto flex items-center gap-4">
               {user ? (
                 <>
-                  <span className="text-sm font-medium text-gray-200">{user.email}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="px-4 py-2 text-sm font-medium text-gray-200 hover:text-white transition-colors"
+                  <Link
+                    to="/my-assets"
+                    className="hidden md:inline-flex items-center gap-2 rounded-full border border-gray-800 px-4 py-2 text-sm font-medium text-gray-200 hover:border-gray-700 hover:text-white transition-colors"
                   >
-                    Logout
-                  </button>
+                    <Bookmark className="h-4 w-4" />
+                    {t('nav.myAssets')}
+                  </Link>
+                  <Link
+                    to="/cart"
+                    className="hidden md:inline-flex items-center gap-2 rounded-full border border-gray-800 px-4 py-2 text-sm font-medium text-gray-200 hover:border-gray-700 hover:text-white transition-colors"
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    {t('nav.cart')}
+                  </Link>
+                  <div className="relative" ref={profileMenuRef}>
+                          <button
+                            type="button"
+                            onClick={() => setProfileMenuOpen(prev => !prev)}
+                            className="inline-flex items-center gap-2 rounded-full border border-gray-800 bg-gray-900/80 px-2.5 py-1.5 text-sm font-medium text-gray-100 hover:border-gray-700 hover:text-white transition-colors"
+                          >
+                            <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gray-700 text-base font-semibold">
+                        {userInitial}
+                        <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-emerald-500 border border-gray-900" />
+                      </span>
+                      <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {profileMenuOpen && (
+                      <div className="absolute right-0 mt-3 w-56 rounded-2xl bg-gray-900/95 border border-gray-800 shadow-2xl backdrop-blur z-30">
+                        <div className="px-4 py-3 border-b border-gray-800">
+                          <p className="text-sm font-semibold text-white">{userHandle || user?.email}</p>
+                          <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                        </div>
+                        <nav className="py-2">
+                          <Link
+                            to="/account"
+                            onClick={() => setProfileMenuOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                          >
+                            {t('profile.accountSettings')}
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                          >
+                            {t('profile.signOut')}
+                          </button>
+                        </nav>
+                      </div>
+                    )}
+                  </div>
                 </>
               ) : (
                 <>
@@ -269,12 +417,16 @@ function App() {
                 <Menu className="h-6 w-6" />
               </button>
             </div>
+            </div>
           </div>
-        </div>
-      </header>
-      <main className="flex-1">
+        </header>
+      )}
+      <main className={`${user?.role === 'ADMIN' ? '' : 'flex-1'}`}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/"
+            element={user?.role === 'ADMIN' ? <Navigate to="/admin" replace /> : <HomePage />}
+          />
           <Route path="/models" element={<ModelsPage />} />
           <Route path="/models/:id" element={<ModelDetailPage />} />
           <Route path="/scenes" element={<ScenesPage />} />
@@ -284,10 +436,17 @@ function App() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/account" element={<AccountSettingsPage />} />
+          <Route
+            path="/admin"
+            element={user?.role === 'ADMIN' ? <AdminDashboardPage /> : <Navigate to="/" replace />}
+          />
         </Routes>
       </main>
 
-      <footer className="bg-gray-950 text-gray-200 py-16">
+      {user?.role !== 'ADMIN' && (
+        <footer className="bg-gray-950 text-gray-200 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-12 mb-12 text-center sm:text-left">
             <div className="min-w-[160px]">
@@ -339,7 +498,8 @@ function App() {
             <p className="text-xs text-gray-500">{t('footer.copyright', { year: new Date().getFullYear() })}</p>
           </div>
         </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }
