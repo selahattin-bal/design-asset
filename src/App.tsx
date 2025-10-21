@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Search, ChevronDown, Menu, Facebook, Instagram, Twitter, Youtube, Bookmark, ShoppingCart } from 'lucide-react';
-import { Link, NavLink, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { ChevronDown, Menu, Facebook, Instagram, Twitter, Youtube, Bookmark, ShoppingCart } from 'lucide-react';
+import { Link, NavLink, Routes, Route, useLocation, Navigate, useNavigate } from 'react-router-dom';
+import { HeaderSearch } from './components/HeaderSearch';
 import { HomePage } from './pages/HomePage';
+import { SearchResultsPage } from './pages/SearchResultsPage';
 import { ModelsPage } from './pages/ModelsPage';
 import { ModelDetailPage } from './pages/ModelDetailPage';
 import { ScenesPage } from './pages/ScenesPage';
@@ -16,7 +18,7 @@ import { AccountSettingsPage } from './pages/AccountSettingsPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { useI18n } from './i18n/I18nProvider';
 import { availableLanguages } from './i18n/translations';
-import { clearTokens } from './services/authService';
+import { clearTokens, getStoredTokens } from './services/authService';
 
 type StoredUser = {
   id: string;
@@ -33,12 +35,14 @@ type StoredUser = {
 
 function App() {
   const { t, language, setLanguage } = useI18n();
+  const navigate = useNavigate();
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<'models' | 'scenes' | null>(null);
   const languageMenuRef = useRef<HTMLDivElement | null>(null);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const dropdownCloseTimerRef = useRef<number | null>(null);
+  const tokenExpiryTimerRef = useRef<number | null>(null);
   const location = useLocation();
 
   const readUserFromStorage = useCallback((): StoredUser | null => {
@@ -126,12 +130,22 @@ function App() {
     };
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback((options?: { redirectTo?: string; reason?: 'expired' | 'manual' }) => {
     window.localStorage.removeItem('user');
     clearTokens();
     setUser(null);
     setProfileMenuOpen(false);
-  };
+    if (tokenExpiryTimerRef.current) {
+      window.clearTimeout(tokenExpiryTimerRef.current);
+      tokenExpiryTimerRef.current = null;
+    }
+    if (options?.redirectTo) {
+      navigate(options.redirectTo, {
+        replace: true,
+        state: options.reason ? { reason: options.reason } : undefined,
+      });
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -148,6 +162,44 @@ function App() {
   useEffect(() => {
     setUser(readUserFromStorage());
   }, [location.key, readUserFromStorage]);
+
+  const scheduleTokenExpiryCheck = useCallback(() => {
+    if (tokenExpiryTimerRef.current) {
+      window.clearTimeout(tokenExpiryTimerRef.current);
+      tokenExpiryTimerRef.current = null;
+    }
+
+    const tokens = getStoredTokens();
+    if (!tokens) {
+      return;
+    }
+
+    const msUntilExpiry = tokens.expiresAt - Date.now();
+    if (msUntilExpiry <= 0) {
+      handleLogout({
+        redirectTo: location.pathname.startsWith('/admin') ? '/signin' : undefined,
+        reason: 'expired',
+      });
+      return;
+    }
+
+    tokenExpiryTimerRef.current = window.setTimeout(() => {
+      handleLogout({
+        redirectTo: location.pathname.startsWith('/admin') ? '/signin' : undefined,
+        reason: 'expired',
+      });
+    }, msUntilExpiry);
+  }, [handleLogout, location.pathname]);
+
+  useEffect(() => {
+    scheduleTokenExpiryCheck();
+    return () => {
+      if (tokenExpiryTimerRef.current) {
+        window.clearTimeout(tokenExpiryTimerRef.current);
+        tokenExpiryTimerRef.current = null;
+      }
+    };
+  }, [scheduleTokenExpiryCheck, user?.id]);
 
   const userInitial = user?.email?.[0]?.toUpperCase() ?? '?';
   const userHandle = user?.email?.split('@')[0] ?? '';
@@ -299,12 +351,7 @@ function App() {
 
             <div className="hidden md:flex flex-1 justify-center">
               <div className="relative w-full max-w-2xl">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-                <input
-                  type="search"
-                  placeholder={t('searchPlaceholder')}
-                  className="w-full rounded-full bg-gray-900/90 border border-gray-800 py-3 pl-12 pr-4 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-700"
-                />
+                <HeaderSearch />
               </div>
             </div>
 
@@ -353,7 +400,7 @@ function App() {
                           </Link>
                           <button
                             type="button"
-                            onClick={handleLogout}
+                            onClick={() => handleLogout({ redirectTo: '/signin', reason: 'manual' })}
                             className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
                           >
                             {t('profile.signOut')}
@@ -429,6 +476,7 @@ function App() {
           />
           <Route path="/models" element={<ModelsPage />} />
           <Route path="/models/:id" element={<ModelDetailPage />} />
+          <Route path="/search" element={<SearchResultsPage />} />
           <Route path="/scenes" element={<ScenesPage />} />
           <Route path="/scenes/:id" element={<SceneDetailPage />} />
           <Route path="/textures" element={<TexturesPage />} />

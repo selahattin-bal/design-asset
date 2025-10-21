@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Search, Filter, Plus, MoreHorizontal, Upload, X, AlertTriangle, Trash } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Search, Filter, Plus, MoreHorizontal, Upload, X, AlertTriangle, Trash, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { newModelAssets, newSceneAssets, textureAssets, type AssetCardContent } from '../data/homeContent';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import {
   createAsset,
   deleteAsset,
@@ -108,6 +109,24 @@ type TableRow = {
   statusTone: 'emerald' | 'blue' | 'amber';
 };
 
+type TypeFilter = 'ALL' | 'MODEL' | 'SCENE' | 'TEXTURE' | 'FEATURED';
+type StatusFilter = 'ALL' | 'PUBLISHED' | 'DRAFT' | 'PRIVATE';
+
+const typeFilterOptions: Array<{ value: TypeFilter; label: string }> = [
+  { value: 'ALL', label: 'All' },
+  { value: 'MODEL', label: 'Models' },
+  { value: 'SCENE', label: 'Scenes' },
+  { value: 'TEXTURE', label: 'Textures' },
+  { value: 'FEATURED', label: 'Featured' },
+];
+
+const statusFilterOptions: Array<{ value: StatusFilter; label: string }> = [
+  { value: 'ALL', label: 'All statuses' },
+  { value: 'PUBLISHED', label: 'Published' },
+  { value: 'DRAFT', label: 'Draft' },
+  { value: 'PRIVATE', label: 'Private' },
+];
+
 const sampleAssetPayload: UpsertAssetPayload = {
   type: 'MODEL',
   title: 'New Lounge Chair',
@@ -145,6 +164,7 @@ export const AdminDashboardPage = () => {
   }, []);
 
   const [remoteAssets, setRemoteAssets] = useState<Asset[]>([]);
+  const [hasFetchedRemoteAssets, setHasFetchedRemoteAssets] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
@@ -159,6 +179,13 @@ export const AdminDashboardPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Asset | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [searchValue, setSearchValue] = useState('');
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState('');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('ALL');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [showOnlyFree, setShowOnlyFree] = useState(false);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const filterContainerRef = useRef<HTMLDivElement | null>(null);
 
   const redirectToHome = useCallback(() => {
     clearTokens();
@@ -171,10 +198,11 @@ export const AdminDashboardPage = () => {
     const fetchAssets = async () => {
       setIsLoading(true);
       try {
-        const items = await listAssets();
+        const items = await listAssets({ query: debouncedSearchValue || undefined });
         if (!isCancelled) {
           setRemoteAssets(items);
           setLoadError(null);
+          setHasFetchedRemoteAssets(true);
         }
       } catch (error) {
         if (!isCancelled) {
@@ -200,7 +228,15 @@ export const AdminDashboardPage = () => {
     return () => {
       isCancelled = true;
     };
-  }, [redirectToHome]);
+  }, [debouncedSearchValue, redirectToHome]);
+
+  useEffect(() => {
+    const handle = window.setTimeout(() => {
+      setDebouncedSearchValue(searchValue.trim());
+    }, 350);
+
+    return () => window.clearTimeout(handle);
+  }, [searchValue]);
 
   useEffect(() => {
     if (!openRowMenuId) {
@@ -219,13 +255,78 @@ export const AdminDashboardPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openRowMenuId]);
 
+  useEffect(() => {
+    if (!isFilterPanelOpen) {
+      return;
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (filterContainerRef.current && target && filterContainerRef.current.contains(target)) {
+        return;
+      }
+      setIsFilterPanelOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [filterContainerRef, isFilterPanelOpen]);
+
   const hasRemoteAssets = remoteAssets.length > 0;
+  const isSearchActive = Boolean(debouncedSearchValue);
+
+  const dataSourceLabel = useMemo(() => {
+    if (isSearchActive) {
+      return hasFetchedRemoteAssets
+        ? `search results for "${debouncedSearchValue}".`
+        : 'search results.';
+    }
+    return hasFetchedRemoteAssets ? 'the live asset inventory.' : 'the storefront seed content.';
+  }, [debouncedSearchValue, hasFetchedRemoteAssets, isSearchActive]);
 
   const rows = useMemo<TableRow[]>(() => {
-    const source = hasRemoteAssets ? remoteAssets : fallbackAssets;
+    const shouldUseRemote = hasFetchedRemoteAssets || isSearchActive;
+    const source = (shouldUseRemote ? remoteAssets : fallbackAssets) as Array<Asset | AssetCardContent>;
+    const filteredSource = source.filter(item => {
+      if (!shouldUseRemote && isSearchActive) {
+        const term = debouncedSearchValue.toLowerCase();
+        const haystacks: unknown[] = [
+          'title' in item ? item.title : undefined,
+          'subtitle' in item ? item.subtitle : undefined,
+          'description' in item ? item.description : undefined,
+          'category' in item ? item.category : undefined,
+          'author' in item ? item.author : undefined,
+        ];
 
-    return source.map(asset => {
-      const rawType = typeof asset.type === 'string' ? asset.type.toUpperCase() : 'MODEL';
+        const matchesSearch = haystacks.some(value => typeof value === 'string' && value.toLowerCase().includes(term));
+        if (!matchesSearch) {
+          return false;
+        }
+      }
+
+      const sourceType = (item as { type?: string }).type;
+      const rawType = typeof sourceType === 'string' ? sourceType.trim().toUpperCase() : 'MODEL';
+      if (typeFilter !== 'ALL' && rawType !== typeFilter) {
+        return false;
+      }
+
+      const sourceStatus = (item as { status?: string }).status;
+      const rawStatus = typeof sourceStatus === 'string' ? sourceStatus.trim().toUpperCase() : 'PUBLISHED';
+      const normalizedStatus: StatusFilter = rawStatus === 'DRAFT' || rawStatus === 'PRIVATE' ? (rawStatus as StatusFilter) : 'PUBLISHED';
+      if (statusFilter !== 'ALL' && normalizedStatus !== statusFilter) {
+        return false;
+      }
+
+      const rawCredits = 'credits' in item ? (item as { credits?: number | 'free' }).credits : undefined;
+      if (showOnlyFree && rawCredits !== 'free') {
+        return false;
+      }
+
+      return true;
+    });
+
+    return filteredSource.map(asset => {
+  const rawType = typeof asset.type === 'string' ? asset.type.trim().toUpperCase() : 'MODEL';
       const typeKey: AssetTypeKey = (typeLabelMap[rawType as AssetTypeKey] ? rawType : 'MODEL') as AssetTypeKey;
       const status = resolveStatus({
         status: 'status' in asset ? (asset as { status?: string }).status : undefined,
@@ -257,7 +358,7 @@ export const AdminDashboardPage = () => {
         statusTone: status.tone,
       };
     });
-  }, [fallbackAssets, hasRemoteAssets, remoteAssets]);
+  }, [debouncedSearchValue, fallbackAssets, hasFetchedRemoteAssets, isSearchActive, remoteAssets, showOnlyFree, statusFilter, typeFilter]);
 
   const summary = useMemo(() => {
     const aggregated = rows.reduce(
@@ -291,7 +392,11 @@ export const AdminDashboardPage = () => {
     };
   }, [rows]);
 
-  const dataSourceLabel = hasRemoteAssets ? 'the live asset inventory.' : 'the storefront seed content.';
+  const activeFilterCount = (statusFilter !== 'ALL' ? 1 : 0) + (showOnlyFree ? 1 : 0);
+  const getTypeButtonClass = (value: TypeFilter) =>
+    value === typeFilter
+      ? 'rounded-full bg-gray-900 px-3 py-1 text-xs font-semibold text-white shadow-sm'
+      : 'rounded-full px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100';
 
   const openCreateModal = () => {
     setModalMode('create');
@@ -446,9 +551,19 @@ export const AdminDashboardPage = () => {
     <div className="min-h-screen bg-gray-100">
       <div className="flex min-h-screen">
         <aside className="hidden lg:flex w-64 flex-col border-r border-gray-200 bg-white">
-          <div className="px-6 py-5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Admin Panel</span>
-            <h1 className="mt-2 text-xl font-semibold text-gray-900">Dashboard</h1>
+          <div className="px-6 py-5 space-y-3">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Admin Panel</span>
+              <h1 className="mt-2 text-xl font-semibold text-gray-900">Dashboard</h1>
+            </div>
+            <button
+              type="button"
+              onClick={redirectToHome}
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
           </div>
           <nav className="flex-1 px-4 py-4 space-y-1 text-sm">
             <a href="#" className="flex items-center justify-between rounded-xl bg-gray-900 text-white px-4 py-2 font-medium">
@@ -499,28 +614,94 @@ export const AdminDashboardPage = () => {
 
         <div className="flex-1 flex flex-col">
           <header className="border-b border-gray-200 bg-white">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-6 py-4">
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-900">Products</h2>
-                <p className="text-sm text-gray-500">Manage the 3D assets available in the catalog.</p>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex flex-col gap-4 px-6 py-4">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col gap-2">
+                  <h2 className="text-2xl font-semibold text-gray-900">Products</h2>
+                  <p className="text-sm text-gray-500">Manage the 3D assets available in the catalog.</p>
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <input
                     type="search"
                     placeholder="Search assets"
+                    value={searchValue}
+                    onChange={event => setSearchValue(event.target.value)}
                     className="w-full sm:w-64 rounded-xl border border-gray-200 bg-gray-50 py-2 pl-9 pr-3 text-sm text-gray-700 placeholder-gray-400 focus:border-gray-400 focus:ring-2 focus:ring-gray-200"
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
-                  >
-                    <Filter className="h-4 w-4" />
-                    Filter
-                  </button>
+                  <div className="relative" ref={filterContainerRef}>
+                    <button
+                      type="button"
+                      onClick={() => setIsFilterPanelOpen(prev => !prev)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                      aria-haspopup="true"
+                      aria-expanded={isFilterPanelOpen}
+                    >
+                      <Filter className="h-4 w-4" />
+                      Filter
+                      {activeFilterCount > 0 && (
+                        <span className="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-900 text-xs font-semibold text-white">
+                          {activeFilterCount}
+                        </span>
+                      )}
+                    </button>
+                    {isFilterPanelOpen && (
+                      <div className="absolute right-0 z-20 mt-2 w-64 rounded-2xl border border-gray-200 bg-white p-4 text-sm shadow-xl">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Status</p>
+                          <div className="mt-2 space-y-2">
+                            {statusFilterOptions.map(option => (
+                              <label key={option.value} className="flex items-center gap-2 text-sm text-gray-700">
+                                <input
+                                  type="radio"
+                                  name="asset-status-filter"
+                                  value={option.value}
+                                  checked={statusFilter === option.value}
+                                  onChange={() => setStatusFilter(option.value)}
+                                  className="h-4 w-4 border-gray-300 text-gray-900 focus:ring-gray-400"
+                                />
+                                <span>{option.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="mt-4 border-t border-gray-100 pt-4">
+                          <label className="flex items-center gap-2 text-sm text-gray-700">
+                            <input
+                              type="checkbox"
+                              checked={showOnlyFree}
+                              onChange={event => setShowOnlyFree(event.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400"
+                            />
+                            Free assets only
+                          </label>
+                        </div>
+                        <div className="mt-4 flex justify-between">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setStatusFilter('ALL');
+                              setShowOnlyFree(false);
+                              setIsFilterPanelOpen(false);
+                            }}
+                            className="text-xs font-semibold text-gray-500 hover:text-gray-700"
+                          >
+                            Reset
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsFilterPanelOpen(false)}
+                            className="rounded-xl bg-gray-900 px-3 py-1 text-xs font-semibold text-white hover:bg-gray-800"
+                          >
+                            Apply
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <button
                     type="button"
                     onClick={openCreateModal}
@@ -532,12 +713,13 @@ export const AdminDashboardPage = () => {
                 </div>
               </div>
             </div>
+           </div>
           </header>
 
           <main className="flex-1 overflow-y-auto px-6 py-6 space-y-8">
             {isLoading && (
-              <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600">
-                Loading assets from the API...
+              <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3">
+                <LoadingSpinner label="Loading assets from the API…" />
               </div>
             )}
 
@@ -552,8 +734,16 @@ export const AdminDashboardPage = () => {
             )}
 
             {successMessage && (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                {successMessage}
+              <div className="flex items-start justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                <span>{successMessage}</span>
+                <button
+                  type="button"
+                  onClick={() => setSuccessMessage(null)}
+                  className="rounded-full border border-emerald-200 bg-emerald-100 p-1.5 text-emerald-700 hover:bg-emerald-200"
+                  aria-label="Dismiss success message"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
             )}
 
@@ -589,10 +779,16 @@ export const AdminDashboardPage = () => {
                   <p className="text-xs text-gray-500">Showing {rows.length} records pulled from {dataSourceLabel}</p>
                 </div>
                 <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-gray-500">
-                  <button type="button" className="rounded-full bg-gray-100 px-3 py-1 text-gray-700">All</button>
-                  <button type="button" className="rounded-full px-3 py-1 hover:bg-gray-100">Models</button>
-                  <button type="button" className="rounded-full px-3 py-1 hover:bg-gray-100">Scenes</button>
-                  <button type="button" className="rounded-full px-3 py-1 hover:bg-gray-100">Textures</button>
+                  {typeFilterOptions.map(option => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setTypeFilter(option.value)}
+                      className={getTypeButtonClass(option.value)}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
                 </div>
               </div>
               <div className="overflow-x-auto">
@@ -612,7 +808,18 @@ export const AdminDashboardPage = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-gray-700">
-                    {rows.map(row => (
+                    {rows.length === 0 ? (
+                      <tr>
+                        <td colSpan={10} className="px-6 py-12 text-center text-sm text-gray-500">
+                          {isSearchActive
+                            ? `No assets matched "${debouncedSearchValue}".`
+                            : hasFetchedRemoteAssets
+                              ? 'No assets available yet.'
+                              : 'Loading sample catalog data.'}
+                        </td>
+                      </tr>
+                    ) : (
+                      rows.map(row => (
                       <tr key={row.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div>
@@ -645,7 +852,7 @@ export const AdminDashboardPage = () => {
                                 <MoreHorizontal className="h-4 w-4" />
                               </button>
                               {openRowMenuId === row.id && (
-                                <div className="absolute right-0 mt-2 w-40 rounded-xl border border-gray-200 bg-white py-1 text-left shadow-xl" data-asset-menu>
+                                <div className="absolute right-0 mt-2 w-40 rounded-xl border border-gray-200 bg-white py-1 text-left shadow-xl z-30" data-asset-menu>
                                   <button
                                     type="button"
                                     onClick={() => handleEditAsset(row.id)}
@@ -667,7 +874,8 @@ export const AdminDashboardPage = () => {
                           )}
                         </td>
                       </tr>
-                    ))}
+                    ))
+                    )}
                   </tbody>
                 </table>
               </div>

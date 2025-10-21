@@ -1,10 +1,49 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AssetCard } from '../components/AssetCard';
-import { textureAssets } from '../data/homeContent';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { listAssets, mapAssetToCardProps, type Asset } from '../services/assetService';
+import { ApiError } from '../services/apiClient';
 import { useI18n } from '../i18n/I18nProvider';
 
 export function TexturesPage() {
   const { t } = useI18n();
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const fetchAssets = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const items = await listAssets({ type: 'TEXTURE' });
+        if (!isCancelled) {
+          setAssets(items);
+        }
+      } catch (fetchError) {
+        if (!isCancelled) {
+          const message = fetchError instanceof ApiError
+            ? fetchError.message
+            : fetchError instanceof Error
+              ? fetchError.message
+              : 'Unable to load assets.';
+          setError(message);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchAssets();
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   return (
     <div className="bg-gray-50 py-12 md:py-16 min-h-full">
@@ -29,13 +68,33 @@ export function TexturesPage() {
           </div>
         </header>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-          {textureAssets.map(({ id, ...asset }) => (
-            <Link key={id} to={`/textures/${id}`} className="block">
-              <AssetCard {...asset} />
-            </Link>
-          ))}
-        </div>
+        {error && (
+          <div className="mb-6 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            {error}
+          </div>
+        )}
+
+        {isLoading ? (
+          <LoadingSpinner label="Loading assets…" className="text-sm text-gray-500" />
+        ) : assets.length === 0 ? (
+          <p className="text-sm text-gray-500">No assets available yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {assets.map(asset => (
+              <Link key={asset.id} to={`/textures/${asset.id}`} className="block">
+                <AssetCard
+                  {...mapAssetToCardProps(
+                    asset,
+                    {
+                      sizeOverride: 'medium',
+                      aspectRatioOverride: 'square',
+                    },
+                  )}
+                />
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

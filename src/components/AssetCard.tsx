@@ -1,5 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
 import { Eye, Heart, Download } from 'lucide-react';
 import { useI18n } from '../i18n/I18nProvider';
+import { LoadingSpinner } from './LoadingSpinner';
 
 export interface AssetCardProps {
   image: string;
@@ -26,6 +28,40 @@ export function AssetCard({
   size = 'medium',
   aspectRatio = 'square',
 }: AssetCardProps) {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [hasImageError, setHasImageError] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    setIsImageLoaded(false);
+    setHasImageError(false);
+  }, [image]);
+
+  useEffect(() => {
+    const img = imageRef.current;
+    if (!img) {
+      return;
+    }
+    if (img.complete) {
+      if (img.naturalWidth === 0) {
+        setHasImageError(true);
+        setIsImageLoaded(true);
+      } else {
+        setHasImageError(false);
+        setIsImageLoaded(true);
+      }
+    }
+  }, [image]);
+
+  const handleImageLoad = () => {
+    setHasImageError(false);
+    setIsImageLoaded(true);
+  };
+
+  const handleImageError = () => {
+    setHasImageError(true);
+    setIsImageLoaded(true);
+  };
   const sizeClasses = {
     small: 'text-xs',
     medium: 'text-sm',
@@ -55,11 +91,29 @@ export function AssetCard({
         >
           {creditLabel}
         </span>
+        <div
+          className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-gray-100 transition-opacity duration-200 ${
+            !isImageLoaded && !hasImageError ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <LoadingSpinner label="Loading preview…" className="text-xs text-gray-500" />
+        </div>
         <img
           src={image}
           alt={title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          ref={imageRef}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+          loading="lazy"
+          className={`w-full h-full object-cover transition-transform duration-500 ${
+            isImageLoaded ? 'opacity-100 group-hover:scale-110' : 'opacity-0'
+          }`}
         />
+        {hasImageError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-xs text-gray-500">
+            Preview unavailable
+          </div>
+        )}
       </div>
 
       <div className="p-4 md:p-5">

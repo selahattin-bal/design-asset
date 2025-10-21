@@ -30,6 +30,15 @@ export const translations: Translations = {
       secondaryCta: 'Learn More',
     },
     searchPlaceholder: 'Search assets or start creating',
+    search: {
+      resultsFor: 'Search results for "{{query}}".',
+      startPrompt: 'Enter a term to discover matching assets.',
+      loading: 'Loading search results…',
+      emptyState: 'Search for a model, scene, or texture to see live results.',
+      noResults: 'No assets matched "{{query}}".',
+      resultsHeading: 'Matching assets',
+      resultCount: 'Showing {{count}} result(s).',
+    },
     auth: {
       signIn: 'Sign In',
       signUp: 'Sign Up',
@@ -97,6 +106,8 @@ export const translations: Translations = {
       save: 'Save',
       getMoreCredits: 'Get More Credits',
       languageToggle: 'EN / TR',
+      search: 'Search',
+      backHome: 'Back to home page',
     },
     filters: {
       catalog: 'Catalog',
@@ -307,6 +318,15 @@ export const translations: Translations = {
       secondaryCta: 'Daha Fazla Bilgi Al',
     },
     searchPlaceholder: 'Varlık arayın veya üretmeye başlayın',
+    search: {
+      resultsFor: '"{{query}}" için arama sonuçları.',
+      startPrompt: 'Eşleşen varlıkları görmek için bir kelime yazın.',
+      loading: 'Arama sonuçları yükleniyor…',
+      emptyState: 'Model, sahne veya doku arayarak canlı sonuçları görün.',
+      noResults: '"{{query}}" ile eşleşen varlık bulunamadı.',
+      resultsHeading: 'Eşleşen varlıklar',
+      resultCount: '{{count}} sonuç gösteriliyor.',
+    },
     auth: {
       signIn: 'Giriş Yap',
       signUp: 'Kayıt Ol',
@@ -373,6 +393,8 @@ export const translations: Translations = {
       save: 'Kaydet',
       getMoreCredits: 'Daha Fazla Kredi Al',
       languageToggle: 'TR / EN',
+      search: 'Ara',
+      backHome: 'Ana sayfaya dön',
     },
     filters: {
       catalog: 'Katalog',

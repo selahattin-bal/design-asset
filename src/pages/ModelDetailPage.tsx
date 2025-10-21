@@ -1,29 +1,118 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { Download, Eye, Heart } from 'lucide-react';
 import { AssetCard } from '../components/AssetCard';
-import { newModelAssets } from '../data/homeContent';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { getAsset, listAssets, mapAssetToCardProps, formatAssetDate, type Asset } from '../services/assetService';
+import { ApiError } from '../services/apiClient';
 import { useI18n } from '../i18n/I18nProvider';
 
 export function ModelDetailPage() {
   const { id } = useParams();
-  const model = useMemo(() => newModelAssets.find(item => item.id === id), [id]);
+  const [asset, setAsset] = useState<Asset | null>(null);
+  const [relatedAssets, setRelatedAssets] = useState<Asset[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const { t } = useI18n();
 
-  const gallery = model?.gallery?.length ? model.gallery : model ? [model.image] : [];
+  const gallery = asset?.gallery?.length ? asset.gallery : asset ? [asset.image] : [];
   const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => {
     setActiveImage(0);
   }, [id]);
 
-  if (!model) {
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    let isCancelled = false;
+    setIsLoading(true);
+    setErrorMessage(null);
+    setNotFound(false);
+
+    const fetchAsset = async () => {
+      try {
+        const item = await getAsset(id);
+        if (isCancelled) {
+          return;
+        }
+
+        setAsset(item);
+
+        try {
+          const candidates = await listAssets({ type: 'MODEL' });
+          if (!isCancelled) {
+            setRelatedAssets(candidates.filter(candidate => candidate.id !== item.id));
+          }
+        } catch (relatedError) {
+          if (!isCancelled) {
+            console.warn('Failed to load related model assets', relatedError);
+          }
+        }
+      } catch (fetchError) {
+        if (isCancelled) {
+          return;
+        }
+
+        if (fetchError instanceof ApiError && fetchError.status === 404) {
+          setNotFound(true);
+          return;
+        }
+
+        const message = fetchError instanceof ApiError
+          ? fetchError.message
+          : fetchError instanceof Error
+            ? fetchError.message
+            : 'Unable to load the requested model.';
+        setErrorMessage(message);
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchAsset();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [id]);
+
+  if (notFound) {
     return <Navigate to="/models" replace />;
   }
 
-  const related = newModelAssets
-    .filter(item => item.id !== model.id && item.category && item.category === model.category)
+  if (!asset) {
+    if (isLoading) {
+      return (
+        <div className="bg-gray-50">
+          <div className="max-w-4xl mx-auto px-4 py-16 flex justify-center">
+            <LoadingSpinner label="Loading model…" className="text-sm text-gray-500" />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 py-16 space-y-4 text-center">
+          <p className="text-sm text-gray-500">{errorMessage ?? 'Unable to display this model right now.'}</p>
+          <Link to="/models" className="text-sm font-semibold text-gray-900 underline">
+            {t('sections.viewAllModels')}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const related = relatedAssets
+    .filter(item => asset.category && item.category === asset.category)
     .slice(0, 6);
+  const fallbackRelated = (related.length > 0 ? related : relatedAssets).slice(0, 6);
 
   const categoryTranslationMap: Record<string, string> = {
     Furniture: 'filters.furniture',
@@ -64,14 +153,14 @@ export function ModelDetailPage() {
                 {t('nav.models')}
               </Link>
             </li>
-            {model.category && (
+            {asset.category && (
               <>
                 <li>/</li>
-                <li className="text-gray-700">{translateCategory(model.category)}</li>
+                <li className="text-gray-700">{translateCategory(asset.category)}</li>
               </>
             )}
             <li>/</li>
-            <li className="text-gray-900">{model.title}</li>
+            <li className="text-gray-900">{asset.title}</li>
           </ol>
         </nav>
 
@@ -79,8 +168,8 @@ export function ModelDetailPage() {
           <div>
             <div className="bg-white rounded-3xl shadow-sm p-6">
               <img
-                src={gallery[activeImage] ?? model.image}
-                alt={model.title}
+                src={gallery[activeImage] ?? asset.image}
+                alt={asset.title}
                 className="w-full rounded-2xl object-cover"
               />
             </div>
@@ -95,46 +184,47 @@ export function ModelDetailPage() {
                       activeImage === index ? 'border-gray-900' : 'border-transparent hover:border-gray-300'
                     }`}
                   >
-                    <img src={image} alt={`${model.title} view ${index + 1}`} className="h-24 w-32 object-cover" />
+                    <img src={image} alt={`${asset.title} view ${index + 1}`} className="h-24 w-32 object-cover" />
                   </button>
                 ))}
               </div>
             )}
 
-            {model.description && (
+            {asset.description && (
               <div className="mt-10 bg-white rounded-3xl shadow-sm p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-3">{t('detail.overview')}</h2>
-                <p className="text-sm text-gray-600 leading-relaxed">{model.description}</p>
+                <p className="text-sm text-gray-600 leading-relaxed">{asset.description}</p>
               </div>
             )}
           </div>
 
           <aside className="space-y-6">
             <div className="bg-white rounded-3xl shadow-sm p-6">
-              {model.brand && <p className="text-sm font-semibold text-gray-500 uppercase mb-2">{model.brand}</p>}
-              <h1 className="text-2xl font-bold text-gray-900 mb-3">{model.title}</h1>
-              {model.subtitle && <p className="text-sm text-gray-500 mb-6">{model.subtitle}</p>}
+              {asset.brand && <p className="text-sm font-semibold text-gray-500 uppercase mb-2">{asset.brand}</p>}
+              <h1 className="text-2xl font-bold text-gray-900 mb-3">{asset.title}</h1>
+              {asset.subtitle && <p className="text-sm text-gray-500 mb-6">{asset.subtitle}</p>}
 
               <div className="flex flex-wrap items-center gap-3 mb-6 text-sm">
                 <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700">
-                  {typeof model.credits === 'number' ? t('asset.credits', { count: model.credits }) : t('asset.free')}
+                  {typeof asset.credits === 'number' ? t('asset.credits', { count: asset.credits }) : t('asset.free')}
                 </span>
-                {model.views !== undefined && (
+                {asset.views !== undefined && (
                   <span className="inline-flex items-center gap-1 text-gray-500">
                     <Eye className="h-4 w-4" />
-                    {model.views}
+                    {asset.views}
                   </span>
                 )}
-                {model.likes !== undefined && (
+                {asset.likes !== undefined && (
                   <span className="inline-flex items-center gap-1 text-gray-500">
                     <Heart className="h-4 w-4" />
-                    {model.likes}
+                    {asset.likes}
                   </span>
                 )}
+                {formatAssetDate(asset) && <span className="text-xs text-gray-400 ml-auto">{formatAssetDate(asset)}</span>}
               </div>
 
               <div className="space-y-3">
-                {model.downloadOptions?.map(option => (
+                {asset.downloadOptions?.map(option => (
                   <button
                     key={option.label}
                     className="w-full inline-flex items-center justify-between rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 transition-colors"
@@ -174,9 +264,9 @@ export function ModelDetailPage() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {(related.length ? related : newModelAssets.filter(item => item.id !== model.id).slice(0, 4)).map(({ id: relatedId, ...asset }) => (
-              <Link key={relatedId} to={`/models/${relatedId}`} className="block">
-                <AssetCard {...asset} />
+            {fallbackRelated.map(relatedAsset => (
+              <Link key={relatedAsset.id} to={`/models/${relatedAsset.id}`} className="block">
+                <AssetCard {...mapAssetToCardProps(relatedAsset)} />
               </Link>
             ))}
           </div>

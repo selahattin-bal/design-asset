@@ -1,10 +1,72 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AssetCard } from '../components/AssetCard';
-import { featuredWorkAssets, newModelAssets, newSceneAssets, textureAssets } from '../data/homeContent';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { listAssets, mapAssetToCardProps, type Asset } from '../services/assetService';
+import { ApiError } from '../services/apiClient';
 import { useI18n } from '../i18n/I18nProvider';
 
 export function HomePage() {
   const { t } = useI18n();
+  const [modelAssets, setModelAssets] = useState<Asset[]>([]);
+  const [sceneAssets, setSceneAssets] = useState<Asset[]>([]);
+  const [textureAssets, setTextureAssets] = useState<Asset[]>([]);
+  const [featuredAssets, setFeaturedAssets] = useState<Asset[]>([]);
+  type SectionKey = 'models' | 'scenes' | 'textures' | 'featured';
+  const [loadingMap, setLoadingMap] = useState<Record<SectionKey, boolean>>({
+    models: true,
+    scenes: true,
+    textures: true,
+    featured: true,
+  });
+  const [errorMap, setErrorMap] = useState<Record<SectionKey, string | null>>({
+    models: null,
+    scenes: null,
+    textures: null,
+    featured: null,
+  });
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const sections: Array<{ key: SectionKey; type: Asset['type']; setter: (items: Asset[]) => void }> = [
+      { key: 'models', type: 'MODEL', setter: setModelAssets },
+      { key: 'scenes', type: 'SCENE', setter: setSceneAssets },
+      { key: 'textures', type: 'TEXTURE', setter: setTextureAssets },
+      { key: 'featured', type: 'FEATURED', setter: setFeaturedAssets },
+    ];
+
+    sections.forEach(({ key, type, setter }) => {
+      setLoadingMap(prev => ({ ...prev, [key]: true }));
+      setErrorMap(prev => ({ ...prev, [key]: null }));
+
+      listAssets({ type })
+        .then(items => {
+          if (isCancelled) {
+            return;
+          }
+          setter(items);
+          setLoadingMap(prev => ({ ...prev, [key]: false }));
+        })
+        .catch(fetchError => {
+          if (isCancelled) {
+            return;
+          }
+
+          const message = fetchError instanceof ApiError
+            ? fetchError.message
+            : fetchError instanceof Error
+              ? fetchError.message
+              : 'Unable to load assets.';
+          setErrorMap(prev => ({ ...prev, [key]: message }));
+          setLoadingMap(prev => ({ ...prev, [key]: false }));
+        });
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   return (
     <>
@@ -19,14 +81,6 @@ export function HomePage() {
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               {t('hero.subtitle')}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="inline-flex items-center px-8 py-4 rounded-md text-base font-medium text-white bg-gray-900 hover:bg-gray-800 transition-colors">
-                {t('hero.primaryCta')}
-              </button>
-              <button className="inline-flex items-center px-8 py-4 rounded-md text-base font-medium text-gray-900 bg-white border-2 border-gray-900 hover:bg-gray-50 transition-colors">
-                {t('hero.secondaryCta')}
-              </button>
-            </div>
           </div>
         </div>
       </section>
@@ -39,13 +93,24 @@ export function HomePage() {
               {t('buttons.viewAll')}
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-            {newModelAssets.slice(0, 8).map(({ id, ...asset }) => (
-              <Link key={id} to={`/models/${id}`} className="block">
-                <AssetCard {...asset} />
-              </Link>
-            ))}
-          </div>
+          {errorMap.models && (
+            <div className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              {errorMap.models}
+            </div>
+          )}
+          {loadingMap.models ? (
+            <LoadingSpinner label="Loading assets…" className="text-sm text-gray-500" />
+          ) : modelAssets.length === 0 ? (
+            <p className="text-sm text-gray-500">No assets available yet.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+              {modelAssets.slice(0, 8).map(asset => (
+                <Link key={asset.id} to={`/models/${asset.id}`} className="block">
+                  <AssetCard {...mapAssetToCardProps(asset)} />
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -57,13 +122,26 @@ export function HomePage() {
               {t('buttons.viewAll')}
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {newSceneAssets.slice(0, 6).map(({ id, ...asset }) => (
-              <Link key={id} to={`/scenes/${id}`} className="block">
-                <AssetCard {...asset} />
-              </Link>
-            ))}
-          </div>
+          {errorMap.scenes && (
+            <div className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              {errorMap.scenes}
+            </div>
+          )}
+          {loadingMap.scenes ? (
+            <LoadingSpinner label="Loading assets…" className="text-sm text-gray-500" />
+          ) : sceneAssets.length === 0 ? (
+            <p className="text-sm text-gray-500">No assets available yet.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {sceneAssets.slice(0, 6).map(asset => (
+                <Link key={asset.id} to={`/scenes/${asset.id}`} className="block">
+                  <AssetCard
+                    {...mapAssetToCardProps(asset, { sizeOverride: 'small', aspectRatioOverride: 'square' })}
+                  />
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -75,13 +153,26 @@ export function HomePage() {
               {t('buttons.viewAll')}
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {textureAssets.slice(0, 6).map(({ id, ...asset }) => (
-              <Link key={id} to={`/textures/${id}`} className="block">
-                <AssetCard {...asset} />
-              </Link>
-            ))}
-          </div>
+          {errorMap.textures && (
+            <div className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              {errorMap.textures}
+            </div>
+          )}
+          {loadingMap.textures ? (
+            <LoadingSpinner label="Loading assets…" className="text-sm text-gray-500" />
+          ) : textureAssets.length === 0 ? (
+            <p className="text-sm text-gray-500">No assets available yet.</p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              {textureAssets.slice(0, 6).map(asset => (
+                <Link key={asset.id} to={`/textures/${asset.id}`} className="block">
+                  <AssetCard
+                    {...mapAssetToCardProps(asset, { sizeOverride: 'small', aspectRatioOverride: 'square' })}
+                  />
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -93,11 +184,22 @@ export function HomePage() {
               {t('buttons.viewAll')}
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {featuredWorkAssets.slice(0, 3).map(({ id, ...asset }) => (
-              <AssetCard key={id} {...asset} />
-            ))}
-          </div>
+          {errorMap.featured && (
+            <div className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              {errorMap.featured}
+            </div>
+          )}
+          {loadingMap.featured ? (
+            <LoadingSpinner label="Loading assets…" className="text-sm text-gray-500" />
+          ) : featuredAssets.length === 0 ? (
+            <p className="text-sm text-gray-500">No assets available yet.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {featuredAssets.slice(0, 3).map(asset => (
+                <AssetCard key={asset.id} {...mapAssetToCardProps(asset)} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </>

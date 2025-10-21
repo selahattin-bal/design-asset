@@ -223,6 +223,10 @@ export const assetsHandler = async (
         scanInput.ExpressionAttributeValues = { ':type': requestedType };
       }
 
+      const searchTermRaw = event.queryStringParameters?.query ?? '';
+      const searchTerm = searchTermRaw.trim().toLowerCase();
+      const isSearchActive = searchTerm.length > 0;
+
       const result = await documentClient.send(new ScanCommand(scanInput));
       const items = (result.Items ?? []).flatMap(item => {
         try {
@@ -233,9 +237,32 @@ export const assetsHandler = async (
         }
       });
 
+      const matchesSearch = (asset: AssetRecord) => {
+        if (!isSearchActive) {
+          return true;
+        }
+
+        const haystacks: unknown[] = [
+          asset.title,
+          asset.subtitle,
+          asset.description,
+          asset.category,
+          asset.author,
+          asset.brand,
+          asset.id,
+          ...(Array.isArray(asset.tags) ? asset.tags : []),
+        ];
+
+        return haystacks.some(value =>
+          typeof value === 'string' && value.toLowerCase().includes(searchTerm),
+        );
+      };
+
+      const filteredItems = items.filter(matchesSearch);
+
       return jsonResponse(200, {
-        items,
-        count: items.length,
+        items: filteredItems,
+        count: filteredItems.length,
         scannedCount: result.ScannedCount,
       });
     }
